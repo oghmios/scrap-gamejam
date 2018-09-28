@@ -40,10 +40,9 @@ public class SourceMovement : MonoBehaviour {
 	}
 
 	public void setNone(){
-		if(playerLogic.stateTrans == PlayerLogic.TransmutateStates.NORMAL)
+		
 			animatorCharacter.SetBool("isAttack", false);
-		else if (playerLogic.stateTrans == PlayerLogic.TransmutateStates.MELEE)
-			animatorCharacter.SetBool("isAttackPhase2", false);
+		
 
 		state = PlayerAttackStates.NONE;
 	}
@@ -53,10 +52,9 @@ public class SourceMovement : MonoBehaviour {
 
 		if (temp<=0){
 			temp = tempMeleeIni;
-			if(playerLogic.stateTrans == PlayerLogic.TransmutateStates.NORMAL)
+			
 				animatorCharacter.SetBool("isAttack", true);
-			else if (playerLogic.stateTrans == PlayerLogic.TransmutateStates.MELEE)
-				animatorCharacter.SetBool("isAttackPhase2", true);
+			
 			meleeCollider.enabled = true;
 
 			state = PlayerAttackStates.MELEE;

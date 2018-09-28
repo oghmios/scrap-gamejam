@@ -5,9 +5,6 @@ using UnityEngine.UI;
 
 public class PlayerLogic: MonoBehaviour {
 
-	public enum TransmutateStates {NORMAL, MELEE, RANGE, NONE}
-	public TransmutateStates stateTrans;
-
 
 	public enum PlayerStates {IDLE, DAMAGE, EAT, DIE}
 	public PlayerStates state;
@@ -70,18 +67,6 @@ public class PlayerLogic: MonoBehaviour {
 			break;
 		}
 
-		switch(stateTrans){
-		case TransmutateStates.MELEE:
-			MeleeBehaviour();
-			break;
-		case TransmutateStates.RANGE:
-			RangeBehaviour();
-			break;
-		case TransmutateStates.NONE:
-			NoneBehaviour();
-			break;
-		}
-
 
 		// BOTON PARA TRANSFORMAR
 		if(Input.GetButton("Fire2") && Time.time > nextFire){
@@ -91,80 +76,12 @@ public class PlayerLogic: MonoBehaviour {
 		}
 	}
 
-	// TRANSMUTATE
-
-	public void setTransmutateNormal(){
-		spriteGlow.color = new Color32 (98,112,255,50);
-		GetComponent<AudioSource>().pitch = 1;
-		transform.localScale = new Vector3(1.5f,1.5f,1);
-		animatorCharacter.SetBool("isPhase2", false);
-		audioManger.Play(audioManger.bossExplosion,transform.position);
-		GameObject explosionBossAux = (GameObject) Instantiate(explosionBoss.gameObject,transform.position, Quaternion.identity);
-		Destroy(explosionBossAux,0.5f);
-		humanityText.enabled = false;
-		stateTrans = TransmutateStates.NORMAL;
-	}
-	
-	public void setTransmutateMelee(){
-		spriteGlow.color = new Color32 (255,98,98,50);
-		GetComponent<AudioSource>().pitch = 1;
-		transform.localScale = new Vector3(3,3,1);
-		animatorCharacter.SetBool("isPhase2", true);
-		audioManger.Play(audioManger.bossExplosion,transform.position);
-		GameObject explosionBossAux = (GameObject) Instantiate(explosionBoss.gameObject,transform.position, Quaternion.identity);
-		Destroy(explosionBossAux,0.5f);
-		tempHumanity = tempHumanityIni;
-		humanityText.enabled = true;
-		humanityText.color = Color.white;
-		stateTrans = TransmutateStates.MELEE;
-	}
-
-
-	private void MeleeBehaviour(){
-		tempHumanity -= Time.deltaTime;
-
-		humanityText.text = tempHumanity.ToString("0");
-
-
-		if(tempHumanity<5){
-			GetComponent<AudioSource>().pitch = 3;
-			if((int.Parse(tempHumanity.ToString("0")) % 2) == 0){
-				humanityText.color = Color.red;
-			} else {
-				humanityText.color = Color.white;
-			}
-		}
-		if(tempHumanity<0 && state != PlayerStates.DIE){
-			humanityText.enabled = false;
-
-			setDieTransmutate();
-		}
-	}
-
-	private void RangeBehaviour(){
-		tempHumanity -= Time.deltaTime;
-
-		humanityText.text = tempHumanity.ToString("0");
-
-		if(tempHumanity<0 && state != PlayerStates.DIE){
-
-			humanityText.enabled = false;
-			setDieTransmutate();
-		}
-	}
-
-	private void NoneBehaviour(){
-
-	}
-
 	// END TRANSMUTATE
 
 	public void setIdle(){
 
-		if(stateTrans == TransmutateStates.NORMAL)
 		animatorCharacter.SetBool("isEat", false);
-		else if (stateTrans == TransmutateStates.MELEE)
-		animatorCharacter.SetBool("isEatPhase2", false);
+		
 
 		transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 		state = PlayerStates.IDLE;
@@ -172,10 +89,8 @@ public class PlayerLogic: MonoBehaviour {
 
 	public void setEat(){
 		temp = 0.5f;
-		if(stateTrans == TransmutateStates.NORMAL)
+
 			animatorCharacter.SetBool("isEat", true);
-		else if (stateTrans == TransmutateStates.MELEE)
-			animatorCharacter.SetBool("isEatPhase2", true);
 
 		state = PlayerStates.EAT;
 	}
@@ -205,9 +120,6 @@ public class PlayerLogic: MonoBehaviour {
 		transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 		GetComponent<AudioSource>().pitch = 1;
 
-		if (stateTrans == TransmutateStates.MELEE)
-			animatorCharacter.SetBool("isDieTransmutatePhase2", true);
-
 		animatorCharacter.GetComponent<SpriteRenderer>().flipX = !animatorCharacter.GetComponent<SpriteRenderer>().flipX;
 
 		audioManger.Play(audioManger.shotBulletBoss,transform.position);
@@ -223,15 +135,10 @@ public class PlayerLogic: MonoBehaviour {
 	public void setDie(){
 		transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 		
-		if(stateTrans == TransmutateStates.NORMAL){
 			animatorCharacter.SetBool("isDie", true);
 			animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.5f, animatorCharacter.transform.localPosition.z); 
-		}
-		else if (stateTrans == TransmutateStates.MELEE){
-			animatorCharacter.SetBool("isDiePhase2", true);
-			animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.3f, animatorCharacter.transform.localPosition.z); 
-
-		}
+		
+		
 		audioManger.Play (audioManger.shotBulletBoss,transform.position);
 		GameObject explosion = (GameObject)Instantiate(explosionPlayer.gameObject,transform.position,Quaternion.identity);
 		Destroy (explosion,2);
@@ -385,7 +292,7 @@ public class PlayerLogic: MonoBehaviour {
 			piece3.sprite = null;
 
 			
-			setTransmutateNormal();
+			
 		} else if(i == 3){
 			piecesChar.Clear();
 
@@ -398,30 +305,9 @@ public class PlayerLogic: MonoBehaviour {
 			piece3.sprite = null;
 
 
-			setTransmutateMelee();
+			
 		} 
 
 	}
-
-	/* void OnTriggerStay(Collider other){
-		
-		if(other.tag == "EnemyDamage"){
-			setDamage();
-		}
-		
-		if(other.tag == "BossPiece"){
-			
-			audioManger.Play(audioManger.catchPieceBoss,transform.position);
-			gameLogic.addPieceBoss();
-			Destroy(other.gameObject);
-		}
-		
-		if(other.tag == "PowerUp"){
-			GameObject explosion = (GameObject)Instantiate(explosionPowerUp.gameObject,transform.position,Quaternion.identity);
-			Destroy (explosion,2);
-			sourceBullets.GetComponent<SourceMovement>().addPower();
-		}
-		
-	} */ 
 	
 }

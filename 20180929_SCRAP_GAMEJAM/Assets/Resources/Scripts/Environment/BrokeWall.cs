@@ -11,9 +11,7 @@ public class BrokeWall : MonoBehaviour {
 	
 	void OnTriggerEnter(Collider other){
 		
-		if(other.tag == "Player" 
-		   && other.GetComponent<PlayerLogic>().stateTrans == PlayerLogic.TransmutateStates.MELEE 
-		   && other.GetComponentInChildren<SourceMovement>().state == SourceMovement.PlayerAttackStates.MELEE){
+		if(other.tag == "Player"){
 
 			audioManger.Play(audioManger.destroyPlayer,other.transform.position);
 			GameObject explosionBossAux = (GameObject) Instantiate(explosionBoss.gameObject,transform.position, Quaternion.identity);
