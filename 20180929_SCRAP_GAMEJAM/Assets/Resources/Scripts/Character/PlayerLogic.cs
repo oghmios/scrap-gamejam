@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -69,12 +68,13 @@ public class PlayerLogic: MonoBehaviour {
 
 
 		// BOTON PARA TRANSFORMAR
-		if(Input.GetButton("Fire2") && Time.time > nextFire){
+		if(Input.GetButton("Fire1") && Time.time > nextFire){
 			nextFire = Time.time + fireRate;
 			audioManger.Play(audioManger.Shoot,transform.position);
-			Transmutate();
+			ThrowGarbage();
 		}
-	}
+
+    }
 
 	// END TRANSMUTATE
 
@@ -309,5 +309,10 @@ public class PlayerLogic: MonoBehaviour {
 		} 
 
 	}
-	
+
+    private void ThrowGarbage() {
+
+    }
+
+
 }
