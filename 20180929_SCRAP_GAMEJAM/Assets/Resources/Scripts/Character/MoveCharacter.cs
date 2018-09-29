@@ -24,8 +24,9 @@ public class MoveCharacter : MonoBehaviour {
 	public Rigidbody rigid;
 	public Vector3 sizeSide;
 	public Vector3 sizeGround;
+    public Animator animatorCharacter;
 
-	private void Start(){
+    private void Start(){
 		rigid = GetComponent<Rigidbody>();
 		isJump = false;
 		aircontrol = true;
@@ -44,15 +45,38 @@ public class MoveCharacter : MonoBehaviour {
 		Gizmos.DrawCube(colliderHitsLeft.position, sizeSide);
 	}
 
-	void Update() {
+    void Update() {
 
 
 		float horizontalDirection = Input.GetAxis("Horizontal");
 
-		Collider[] colliderRight = Physics.OverlapBox(colliderHitsRight.position, sizeSide, Quaternion.identity, groundMask);
-		Collider[] colliderLeft = Physics.OverlapBox(colliderHitsLeft.position, sizeSide, Quaternion.identity, groundMask);
+        // && !animatorCharacter.GetCurrentAnimatorStateInfo(0).IsName("Jump")
 
-		Debug.Log(colliderRight.Length+" "+colliderLeft.Length);
+        if (!isGround)
+        {
+           
+            animatorCharacter.SetBool("isWalking", false);
+            animatorCharacter.SetBool("isFall", true);
+        }
+
+        if (horizontalDirection != 0 && isGround)
+        {
+            animatorCharacter.SetBool("isFall", false);
+            animatorCharacter.SetBool("isJump", false);
+            animatorCharacter.SetBool("isWalking", true);
+           
+        }
+
+        if (horizontalDirection == 0 && isGround) {
+            animatorCharacter.SetBool("isFall", false);
+            animatorCharacter.SetBool("isJump", false);
+            animatorCharacter.SetBool("isWalking", false);
+        }
+
+
+
+        Collider[] colliderRight = Physics.OverlapBox(colliderHitsRight.position, sizeSide, Quaternion.identity, groundMask);
+		Collider[] colliderLeft = Physics.OverlapBox(colliderHitsLeft.position, sizeSide, Quaternion.identity, groundMask);
 
 		  if (colliderRight.Length<=0 || colliderLeft.Length<=0){
 			
@@ -65,11 +89,10 @@ public class MoveCharacter : MonoBehaviour {
 
 		if(collidersHits.Length>0){
 			isGround = true;
-		
-		} else {
+            
+        } else {
 			isGround = false;
-
-		}
+        }
 
 		Collider[] collidersDamageHits = Physics.OverlapSphere(checkGround.position,0.05f,groundDamageMask);;
 
@@ -82,12 +105,14 @@ public class MoveCharacter : MonoBehaviour {
 
 		if(isGround){
 			isJump = false;
-			if (Input.GetButtonDown("Jump") && !isJump)  {
-				audioManger.Play(audioManger.jumpPlayer,transform.position);
-				isJump = true;
-				rigid.velocity = new Vector3(rigid.velocity.x,0,0); 
-				rigid.AddForce(0,jumpSpeed,0);
-			}
+            if (Input.GetButtonDown("Jump") && !isJump)
+            {
+                animatorCharacter.SetBool("isJump", true);
+                audioManger.Play(audioManger.jumpPlayer, transform.position);
+                isJump = true;
+                rigid.velocity = new Vector3(rigid.velocity.x, 0, 0);
+                rigid.AddForce(0, jumpSpeed, 0);
+            }
 
 
 		}

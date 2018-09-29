@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class PlayerLogic: MonoBehaviour {
 
 
-	public enum PlayerStates {IDLE, DAMAGE, EAT, DIE}
+	public enum PlayerStates {IDLE, DAMAGE, EAT, DIE, DIG}
 	public PlayerStates state;
 
 	private GameLogic gameLogic;
@@ -61,29 +61,34 @@ public class PlayerLogic: MonoBehaviour {
 		case PlayerStates.EAT:
 			EatBehaviour();
 			break;
-		case PlayerStates.DIE:
+            case PlayerStates.DIG:
+                DigBehaviour();
+                break;
+            case PlayerStates.DIE:
 			DieBehaviour();
 			break;
 		}
 
 
-		// BOTON PARA TRANSFORMAR
-		if(Input.GetButton("Fire1") && Time.time > nextFire){
-			nextFire = Time.time + fireRate;
-			audioManger.Play(audioManger.Shoot,transform.position);
-			ThrowGarbage();
-		}
+        // BOTON PARA TRANSFORMAR
+        if (Input.GetButton("Fire1") && Time.time > nextFire)
+        {
+            nextFire = Time.time + fireRate;
+            audioManger.Play(audioManger.Shoot, transform.position);
+            setDig();
+        }
+        else {
+           // animatorCharacter.SetBool("isDig", false);
+            setIdle();
+        }
 
     }
 
 	// END TRANSMUTATE
 
 	public void setIdle(){
-
-		animatorCharacter.SetBool("isEat", false);
-		
-
-		transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
+        animatorCharacter.SetBool("isDig", false);
+        transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 		state = PlayerStates.IDLE;
 	}
 
@@ -95,9 +100,16 @@ public class PlayerLogic: MonoBehaviour {
 		state = PlayerStates.EAT;
 	}
 
+    public void setDig()
+    {
+        
+        animatorCharacter.SetBool("isDig", true);
+
+        state = PlayerStates.DIG;
+    }
 
 
-	public void setDamage(){
+    public void setDamage(){
 
 		if(state != PlayerStates.DIE ){
 			lifePlayer--;
@@ -177,7 +189,12 @@ public class PlayerLogic: MonoBehaviour {
 		}
 	}
 
-	private void DieBehaviour(){
+    private void DigBehaviour()
+    {
+ 
+    }
+
+    private void DieBehaviour(){
 		temp -= Time.deltaTime;
 
 
@@ -209,7 +226,7 @@ public class PlayerLogic: MonoBehaviour {
 		if(other.tag == "PowerUp"){
 			GameObject explosion = (GameObject)Instantiate(explosionPowerUp.gameObject,transform.position,Quaternion.identity);
 			Destroy (explosion,2);
-			sourceBullets.GetComponent<SourceMovement>().addPower();
+			
 		}
 
 	}

@@ -34,7 +34,7 @@ public class BulletLogic: MonoBehaviour {
 				// Instanciamos daño
 				GameObject prefabDamage = (GameObject) Instantiate(prefabPSDamage.gameObject,new Vector3(transform.position.x, transform.position.y,-2), Quaternion.identity);
 				Destroy(prefabDamage,1);
-			audioManger.Play(audioManger.impactBoss,transform.position);
+			    audioManger.Play(audioManger.impactBoss,transform.position);
 				other.GetComponent<BossLogic>().addDamage(damage);
 				Destroy(myTransform.gameObject);
 

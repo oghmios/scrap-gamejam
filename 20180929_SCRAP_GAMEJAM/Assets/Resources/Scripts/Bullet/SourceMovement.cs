@@ -3,7 +3,7 @@ using System.Collections;
 
 public class SourceMovement : MonoBehaviour {
 
-	public enum PlayerAttackStates {NONE, MELEE, RANGE}
+	public enum PlayerAttackStates {NONE, RANGE}
 
 	public PlayerAttackStates state;
 
@@ -22,7 +22,10 @@ public class SourceMovement : MonoBehaviour {
 		isMelee = true;
 		meleeCollider = GetComponent<BoxCollider>();
 		meleeCollider.enabled = false;
-        setRange();
+
+        temp = 0;
+        setNone();
+
 	}
 	
 	// Update is called once per frame
@@ -31,56 +34,46 @@ public class SourceMovement : MonoBehaviour {
 		case PlayerAttackStates.NONE:
 				NoneBehaviour();
 				break;
-		case PlayerAttackStates.MELEE:
-			MeleeBehaviour();
-				break;
 		case PlayerAttackStates.RANGE:
 			RangeBehaviour();
 				break;	}
 	}
 
 	public void setNone(){
-		
-			animatorCharacter.SetBool("isAttack", false);
-		
 
-		state = PlayerAttackStates.NONE;
-	}
 
-	public void setMelee(){
-		
-
-		if (temp<=0){
-			temp = tempMeleeIni;
-			
-				animatorCharacter.SetBool("isAttack", true);
-			
-			meleeCollider.enabled = true;
-
-			state = PlayerAttackStates.MELEE;
-		} else {
-			state = PlayerAttackStates.NONE;
-		}
+        state = PlayerAttackStates.NONE;
 	}
 
 	public void setRange(){
-		if (temp<=0){
-			temp = tempRangeIni;
-			state = PlayerAttackStates.RANGE;
-		} else {
-			state = PlayerAttackStates.NONE;
-		}
+		
+		temp = tempRangeIni;
+
+        animatorCharacter.SetBool("isShoot", true);
+        StartCoroutine("ThrowGarbage");
+        
+        // bulletAux.GetComponent<Rigidbody>().velocity = bulletAux.transform.right * 15f;
+
+        audioManger.Play(audioManger.Shoot, transform.position);
+
+        state = PlayerAttackStates.RANGE;
+		
 	}
 
-	public void addPower(){
-		bullet.GetComponent<BulletLogic>().damage +=5;
-	}
+    IEnumerator ThrowGarbage()
+    {
+        yield return new WaitForSeconds(.225f);
+        GameObject bulletAux = (GameObject)Instantiate(bullet.gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
+        bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x, 6, 0) * 200);
+        Destroy(bulletAux, 4f);
+        
+        
+    }
 
-	private void NoneBehaviour(){
-		if(Input.GetButton("Fire1")){
-			if(isMelee)
-				setMelee();
-			else 
+
+    private void NoneBehaviour(){
+		if(Input.GetButton("Fire2") && temp<=0)
+        {
 				setRange();
 		}
 	}
@@ -89,28 +82,10 @@ public class SourceMovement : MonoBehaviour {
 		// Logica del disparo
 		temp -= Time.deltaTime;
 		if(temp<0){
-			if(Input.GetButton("Fire2")){
-				GameObject bulletAux = (GameObject) Instantiate(bullet.gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
-
-
-                bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(1,2,0) * 800);
-               // bulletAux.GetComponent<Rigidbody>().velocity = bulletAux.transform.right * 15f;
-
-                audioManger.Play(audioManger.Shoot,transform.position);
-				Destroy (bulletAux,4f);
-				temp = tempRangeIni;
-			}
+            animatorCharacter.SetBool("isShoot", false);
+            setNone();
 		}
 	}
-
-	private void MeleeBehaviour(){
-		// Logica del ataque melee
-		temp -= Time.deltaTime;
-		if(temp<0){
-			meleeCollider.enabled = false;
-			setNone();
-			}
-		}
 
 
 }
