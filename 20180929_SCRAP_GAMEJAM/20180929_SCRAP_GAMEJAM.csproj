@@ -408,6 +408,10 @@
     <Compile Include="Assets\Ferr\Path\SVG\SVG.cs" />
     <Compile Include="Assets\Ferr\Path\SVG\SVGLine.cs" />
     <Compile Include="Assets\Ferr\Path\SVG\SVGPath.cs" />
+    <Compile Include="Assets\Resources\Scripts\Blocks\Blocks.cs" />
+    <Compile Include="Assets\Resources\Scripts\Blocks\BlocksGrid.cs" />
+    <Compile Include="Assets\Resources\Scripts\Blocks\BlocksLine.cs" />
+    <Compile Include="Assets\Resources\Scripts\Blocks\BlocksLogic.cs" />
     <Compile Include="Assets\Resources\Scripts\Boss\BossColliderMelee.cs" />
     <Compile Include="Assets\Resources\Scripts\Boss\BossLogic.cs" />
     <Compile Include="Assets\Resources\Scripts\Boss\BossRangeLogic.cs" />

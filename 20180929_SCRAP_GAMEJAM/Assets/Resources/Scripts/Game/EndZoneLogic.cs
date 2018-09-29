@@ -25,7 +25,7 @@ public class EndZoneLogic: MonoBehaviour {
 
 		if(other.tag == "Player"){
 
-			gameLogic.setVictoryResults();
+			gameLogic.setVictory();
 			// audioManger.Play(audioManger.teleportPlayer,other.transform);
 
 

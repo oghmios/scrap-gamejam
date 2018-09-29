@@ -177,7 +177,7 @@ public class BossRangeLogic: MonoBehaviour {
 		}
 		GameObject explosionBossAux = (GameObject) Instantiate(explosionBoss.gameObject,transform.position, Quaternion.identity);
 		Destroy(explosionBossAux,0.5f);
-		gameLogic.setDestroyBossVictory();
+		gameLogic.setVictory();
 		Destroy(gameObject);
 	}
 
