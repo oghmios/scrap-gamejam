@@ -1,8 +1,4 @@
 sceneSetups:
-<<<<<<< HEAD
 - path: Assets/Resources/Scenes/TestBlock.unity
-=======
-- path: Assets/Resources/Scenes/TestCharacter.unity
->>>>>>> d6b4cce1c0079ea196871971225ca79d1c4ed7ef
   isLoaded: 1
   isActive: 1
