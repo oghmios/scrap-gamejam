@@ -22,7 +22,7 @@ public class SourceMovement : MonoBehaviour {
 		isMelee = true;
 		meleeCollider = GetComponent<BoxCollider>();
 		meleeCollider.enabled = false;
-		setNone();
+        setRange();
 	}
 	
 	// Update is called once per frame
@@ -89,10 +89,15 @@ public class SourceMovement : MonoBehaviour {
 		// Logica del disparo
 		temp -= Time.deltaTime;
 		if(temp<0){
-			if(Input.GetButton("Fire1")){
-				GameObject bulletAux = (GameObject) Instantiate(bullet.gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), transform.localRotation);
-				audioManger.Play(audioManger.Shoot,transform.position);
-				Destroy (bulletAux,0.5f);
+			if(Input.GetButton("Fire2")){
+				GameObject bulletAux = (GameObject) Instantiate(bullet.gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
+
+
+                bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(1,2,0) * 800);
+               // bulletAux.GetComponent<Rigidbody>().velocity = bulletAux.transform.right * 15f;
+
+                audioManger.Play(audioManger.Shoot,transform.position);
+				Destroy (bulletAux,4f);
 				temp = tempRangeIni;
 			}
 		}
