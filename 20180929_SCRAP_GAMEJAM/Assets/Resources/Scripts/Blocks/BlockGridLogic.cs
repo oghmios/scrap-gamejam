@@ -134,7 +134,7 @@ public class BlockGridLogic : MonoBehaviour {
     void MoveBehaviour()
     {
 
-        transform.Translate(Vector3.up * Time.deltaTime  * 2.2f);
+        transform.Translate(Vector3.up * Time.deltaTime);
         timeDecay -= Time.deltaTime;
 
         if (timeDecay < 0)
