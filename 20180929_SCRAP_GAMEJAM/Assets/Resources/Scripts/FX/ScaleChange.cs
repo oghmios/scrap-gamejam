@@ -85,7 +85,7 @@ public class ScaleChange : MonoBehaviour
         
         //transform.localScale = new Vector3(Mathf.Lerp(alphaMinX,alphaMaxX,temp/tempUp),Mathf.Lerp(alphaMinY,alphaMaxY,temp/tempUp),transform.localScale.z);
 
-        if (temp<0 || myText.fontSize > 60)
+        if (temp<0 || myText.fontSize > 45)
         {
 			setUpIdle();
             tempFactor = 0;
