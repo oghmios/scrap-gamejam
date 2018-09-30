@@ -12,8 +12,8 @@ public class GameLogic : MonoBehaviour {
     public BlockGridLogic blockGridLogic;
 
 	public enum GameStates {START, GAME, VICTORY, LOSE }
-
-	public GameStates state;
+    public AudioManager audioManger;
+    public GameStates state;
 	private float temp;
 
 	// INTERFACES
@@ -26,7 +26,8 @@ public class GameLogic : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Cursor.visible = false;
-		PlayerPrefs.SetString("Level",Application.loadedLevelName);
+        audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+        PlayerPrefs.SetString("Level",Application.loadedLevelName);
 		player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
         setStart();
 	}
@@ -82,6 +83,7 @@ public class GameLogic : MonoBehaviour {
 		 temp = 0.25f;
         interfaceVictory.gameObject.SetActive(true);
         interfaceGameOver.gameObject.SetActive(false);
+        audioManger.Play(audioManger.playerLaughtLong, transform.position);
         blockGridLogic.SetNone();
         state = GameStates.VICTORY;
 	}
@@ -138,6 +140,11 @@ public class GameLogic : MonoBehaviour {
 	}
 
     public void AddScore(int blockType) {
+
+        textCurrentScore.GetComponent<Animator>().SetBool("isIncrease", true);
+
+        StartCoroutine("FinishScoreAnimation");
+
         if (blockType == 0)
             currentScore += 25;
         else if (blockType == 1)
@@ -162,5 +169,12 @@ public class GameLogic : MonoBehaviour {
 
     }
 
+    
+    IEnumerator FinishScoreAnimation()
+    {
+        yield return new WaitForSeconds(.75f);
+        textCurrentScore.GetComponent<Animator>().SetBool("isIncrease", false);
 
+
+    }
 }

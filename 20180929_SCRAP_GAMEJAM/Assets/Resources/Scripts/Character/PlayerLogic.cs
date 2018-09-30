@@ -181,11 +181,11 @@ public class PlayerLogic: MonoBehaviour {
         // transform.GetChild(0).gameObject.SetActive(false);
         // transform.GetChild(2).gameObject.SetActive(false);
 
-        /* BoxCollider[] col = GetComponents<BoxCollider>();
-		foreach(BoxCollider cola in col){
-			cola.enabled = false;
-		}*/
-        state = PlayerStates.DIE;
+            /* BoxCollider[] col = GetComponents<BoxCollider>();
+            foreach(BoxCollider cola in col){
+                cola.enabled = false;
+            }*/
+            state = PlayerStates.DIE;
 	}
 
     public void setThrowBullet() {
@@ -193,22 +193,27 @@ public class PlayerLogic: MonoBehaviour {
         
         if (piecesChar.Count > 0 && sourceBullets.state == SourceMovement.PlayerAttackStates.NONE)
         {
-            audioManger.Play(audioManger.enemyExplosion, transform.position);
+            audioManger.Play(audioManger.playerThrow, transform.position);
             temp = 2;
             // SI SUPERA LAS PIEZAS A ACUMULAR SE QUITA LA ULTIMA
             int pieceMode = piecesChar.Dequeue();
 
             if (piecesChar.Count == 3) {
                 piece4.sprite = null;
+                piece4.color = new Color(0, 0, 0, 0);
             } else if (piecesChar.Count == 2) {
                 piece3.sprite = null;
+                piece3.color = new Color(0, 0, 0, 0);
             } else if (piecesChar.Count == 1)
             {
                 piece2.sprite = null;
+                piece2.color = new Color(0, 0, 0, 0);
             }
             else if (piecesChar.Count == 0)
             {
                 piece1.sprite = null;
+                piece1.color = new Color(0, 0, 0, 0);
+
                 piece5.sprite = null;
                 piece5.color = new Color(0, 0, 0, 0);
             }
@@ -342,6 +347,7 @@ public class PlayerLogic: MonoBehaviour {
 
 		if(temp<0){
 			// Destroy(this.gameObject);
+            if (gameLogic.state != GameLogic.GameStates.LOSE)
 			gameLogic.setLose();
 		}
 	}
@@ -389,7 +395,6 @@ public class PlayerLogic: MonoBehaviour {
 
 				if(piece == 0)
 				piece1.sprite = pieces[0];
-
 
 				if(piece == 1)
 				piece1.sprite = pieces[1];

@@ -15,15 +15,9 @@ public class SpikeBehaviour : MonoBehaviour {
 	void OnTriggerEnter(Collider other){
 		
 		if(other.tag == "Player"){
-            playerLogic.setDie();
-            /*
-            audioManger.Play(audioManger.destroyPlayer,other.transform.position);
-			GameObject explosionBossAux = (GameObject) Instantiate(explosionBoss.gameObject,transform.position, Quaternion.identity);
-			Destroy(explosionBossAux,0.5f);
-			// gameLogic.setDestroyBossVictory();
-			Destroy(transform.parent.gameObject);
-            */
-		}
+            gameLogic.setLose();
+            //playerLogic.setDie();
+        }
 
         if (other.tag == "Block")
         {

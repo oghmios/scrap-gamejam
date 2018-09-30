@@ -29,6 +29,8 @@ public class AudioManager : MonoBehaviour
 	public AudioClip shotBulletBoss;
 	public AudioClip enemyExplosion;
     public AudioClip playerThrow;
+    public AudioClip playerLaughtShort;
+    public AudioClip playerLaughtLong;
 
     #region Functions
 

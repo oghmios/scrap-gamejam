@@ -142,6 +142,7 @@ public class ContainerLogic : MonoBehaviour
             if (other.GetComponent<GranadeLogic>()!=null && typeOfBlock == other.GetComponent<GranadeLogic>().typeBullet)
             {
                 Destroy(other.gameObject);
+                audioManger.Play(audioManger.playerLaughtShort, transform.position);
                 gameLogic.AddScore(typeOfBlock);
             }
             else {
