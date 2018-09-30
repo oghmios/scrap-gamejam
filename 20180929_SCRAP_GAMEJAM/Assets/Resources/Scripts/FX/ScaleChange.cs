@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class ScaleChange : MonoBehaviour
 {
@@ -11,13 +12,17 @@ public class ScaleChange : MonoBehaviour
 	public float tempDown;
 	public float tempDownIdle;
 	private float temp;
+    private float tempFactor = 0;
 	public float alphaMaxX;
 	public float alphaMaxY;
 	public float alphaMinX;
 	public float alphaMinY;
+    private Text myText;
+    
 
 	void Start(){
 
+        myText = GetComponent<Text>();
 		setUp();
 
 	}
@@ -65,13 +70,25 @@ public class ScaleChange : MonoBehaviour
 
 	// Behaviours
 	private void UpBehaviour(){
-
+        if (tempFactor == 0)
+        {
+            tempFactor = temp;
+            tempFactor -= 0.03f;
+        }
 		temp-= Time.deltaTime;
 
-		transform.localScale = new Vector3(Mathf.Lerp(alphaMinX,alphaMaxX,temp/tempUp),Mathf.Lerp(alphaMinY,alphaMaxY,temp/tempUp),transform.localScale.z);
+        if (temp < tempFactor )
+        {
+            myText.fontSize = myText.fontSize + 1;
+            tempFactor -= 0.03f;
+        }
+        
+        //transform.localScale = new Vector3(Mathf.Lerp(alphaMinX,alphaMaxX,temp/tempUp),Mathf.Lerp(alphaMinY,alphaMaxY,temp/tempUp),transform.localScale.z);
 
-		if(temp<0){
+        if (temp<0 || myText.fontSize > 60)
+        {
 			setUpIdle();
+            tempFactor = 0;
 		}
 
 	}
@@ -85,12 +102,24 @@ public class ScaleChange : MonoBehaviour
 	}
 
 	private void DownBehaviour(){
-		temp-= Time.deltaTime;
+        if (tempFactor == 0)
+        {
+            tempFactor = temp;
+            tempFactor -= 0.03f;
+        }
+        temp -= Time.deltaTime;
 
-		transform.localScale = new Vector3(Mathf.Lerp(alphaMaxX,alphaMinX,temp/tempDown),Mathf.Lerp(alphaMaxY,alphaMinY,temp/tempDown),transform.localScale.z);
+        if (temp < tempFactor)
+        {
+            myText.fontSize = myText.fontSize - 1;
+            tempFactor -= 0.03f;
+        }
+        //transform.localScale = new Vector3(Mathf.Lerp(alphaMaxX,alphaMinX,temp/tempDown),Mathf.Lerp(alphaMaxY,alphaMinY,temp/tempDown),transform.localScale.z);
 
-		if(temp<0){
+        if (temp<0 || myText.fontSize < 20)
+        {
 			setDownIdle();
+            tempFactor = 0;
 		}
 	}
 
