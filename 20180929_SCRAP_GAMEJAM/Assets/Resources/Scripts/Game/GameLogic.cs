@@ -90,7 +90,10 @@ public class GameLogic : MonoBehaviour {
         interfaceVictory.gameObject.SetActive(false);
         interfaceGameOver.gameObject.SetActive(true);
         blockGridLogic.SetNone();
+
+        if (player.state != PlayerLogic.PlayerStates.DIE)
         player.setDie();
+
         temp = 5;
 
 		state = GameStates.LOSE;

@@ -11,7 +11,7 @@ public class ContainerLogic : MonoBehaviour
 
 
 
-
+    public AudioManager audioManger;
     public int typeOfBlock;
     public int randomChange;
     public float timeSleep;
@@ -24,6 +24,7 @@ public class ContainerLogic : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
         gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         timeSleepDecay = timeSleep;
         timeOpenedDecay = timeOpened;
@@ -144,6 +145,7 @@ public class ContainerLogic : MonoBehaviour
                 gameLogic.AddScore(typeOfBlock);
             }
             else {
+                audioManger.Play(audioManger.damagePlayer, transform.position);
                 // PENALIZA SCORE
                 ps.Play();
                 Destroy(other.gameObject);

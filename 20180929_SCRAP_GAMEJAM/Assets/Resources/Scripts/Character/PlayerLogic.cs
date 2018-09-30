@@ -22,7 +22,7 @@ public class PlayerLogic: MonoBehaviour {
 	public AudioManager audioManger;
 	public SourceMovement sourceBullets;
 	public Animator animatorCharacter;
-	public SpriteRenderer spriteGlow;
+	public SpriteRenderer spriteCharacter;
 
     public BoxCollider colliderDig;
 
@@ -48,6 +48,7 @@ public class PlayerLogic: MonoBehaviour {
 		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         piece5.sprite = null;
         piece5.color = new Color(0, 0, 0, 0);
+        spriteCharacter.enabled = true;
         setIdle();
 	}
 
@@ -171,19 +172,20 @@ public class PlayerLogic: MonoBehaviour {
 			//animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.5f, animatorCharacter.transform.localPosition.z); 
 		
 		
-		audioManger.Play (audioManger.shotBulletBoss,transform.position);
+		audioManger.Play (audioManger.bossExplosion,transform.position);
 		GameObject explosion = (GameObject)Instantiate(explosionPlayer.gameObject,transform.position,Quaternion.identity);
 		Destroy (explosion,2);
 		temp = 3f;
 		GetComponent<MoveCharacter>().enabled = false;
-		// transform.GetChild(0).gameObject.SetActive(false);
-		// transform.GetChild(2).gameObject.SetActive(false);
-		
-		/* BoxCollider[] col = GetComponents<BoxCollider>();
+        spriteCharacter.enabled = false;
+        // transform.GetChild(0).gameObject.SetActive(false);
+        // transform.GetChild(2).gameObject.SetActive(false);
+
+        /* BoxCollider[] col = GetComponents<BoxCollider>();
 		foreach(BoxCollider cola in col){
 			cola.enabled = false;
 		}*/
-		state = PlayerStates.DIE;
+        state = PlayerStates.DIE;
 	}
 
     public void setThrowBullet() {
@@ -191,6 +193,7 @@ public class PlayerLogic: MonoBehaviour {
         
         if (piecesChar.Count > 0 && sourceBullets.state == SourceMovement.PlayerAttackStates.NONE)
         {
+            audioManger.Play(audioManger.enemyExplosion, transform.position);
             temp = 2;
             // SI SUPERA LAS PIEZAS A ACUMULAR SE QUITA LA ULTIMA
             int pieceMode = piecesChar.Dequeue();
@@ -351,6 +354,7 @@ public class PlayerLogic: MonoBehaviour {
 
     void OnTriggerEnter(Collider other){
 
+        /*
 		if(other.tag == "EnemyDamage"){
 			setDamage();
 		}
@@ -359,7 +363,7 @@ public class PlayerLogic: MonoBehaviour {
 			GameObject explosion = (GameObject)Instantiate(explosionPowerUp.gameObject,transform.position,Quaternion.identity);
 			Destroy (explosion,2);
 			
-		}
+		}*/
 
 	}
 

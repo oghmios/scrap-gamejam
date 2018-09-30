@@ -28,13 +28,14 @@ public class AudioManager : MonoBehaviour
 	public AudioClip catchPieceBoss;
 	public AudioClip shotBulletBoss;
 	public AudioClip enemyExplosion;
+    public AudioClip playerThrow;
 
     #region Functions
 
-        /* MOVING SOUND  */
-        
-        // clip + transform
-        public AudioSource Play(AudioClip clip, Transform emitter)
+    /* MOVING SOUND  */
+
+    // clip + transform
+    public AudioSource Play(AudioClip clip, Transform emitter)
         {
             return Play(clip, emitter, 1f, 1f);
         }
