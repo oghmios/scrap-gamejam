@@ -1,7 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class GameLogic : MonoBehaviour {
+
+    public int scoreGoal;
+    public Text textScoreGoal;
+    public int currentScore = 0;
+    public Text textCurrentScore;
+
+    public BlockGridLogic blockGridLogic;
 
 	public enum GameStates {START, GAME, VICTORY, LOSE }
 
@@ -10,7 +18,8 @@ public class GameLogic : MonoBehaviour {
 
 	// INTERFACES
 	public Transform interfaceGameOver;
-	private Transform player;
+    public Transform interfaceVictory;
+	private PlayerLogic player;
 
 
 
@@ -18,8 +27,8 @@ public class GameLogic : MonoBehaviour {
 	void Start () {
 		Cursor.visible = false;
 		PlayerPrefs.SetString("Level",Application.loadedLevelName);
-		player = GameObject.FindGameObjectWithTag("Player").transform;
-
+		player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
+        setStart();
 	}
 	
 	// Update is called once per frame
@@ -57,8 +66,11 @@ public class GameLogic : MonoBehaviour {
 	public void setStart(){
 
 		interfaceGameOver.gameObject.SetActive(false);
+        interfaceVictory.gameObject.SetActive(false);
 
-		state = GameStates.START;
+        textScoreGoal.text = "<color=yellow>"+scoreGoal.ToString()+ "</color> GOAL";
+        textCurrentScore.text =  currentScore.ToString() + " SCORE";
+        state = GameStates.START;
 	}
 
 	public void setGame(){
@@ -68,17 +80,18 @@ public class GameLogic : MonoBehaviour {
 
 	public void setVictory(){
 		 temp = 0.25f;
-
-		interfaceGameOver.gameObject.SetActive(false);
-
-		state = GameStates.VICTORY;
+        interfaceVictory.gameObject.SetActive(true);
+        interfaceGameOver.gameObject.SetActive(false);
+        blockGridLogic.SetNone();
+        state = GameStates.VICTORY;
 	}
 
 	public void setLose(){
-
-		interfaceGameOver.gameObject.SetActive(true);
-		
-		temp = 5;
+        interfaceVictory.gameObject.SetActive(false);
+        interfaceGameOver.gameObject.SetActive(true);
+        blockGridLogic.SetNone();
+        player.setDie();
+        temp = 5;
 
 		state = GameStates.LOSE;
 	}
@@ -98,7 +111,7 @@ public class GameLogic : MonoBehaviour {
 	}
 
 	private void VictoryBehaviour(){
-		temp -= Time.deltaTime;
+		/*temp -= Time.deltaTime;
 
 		if(temp<0){
 
@@ -113,7 +126,7 @@ public class GameLogic : MonoBehaviour {
 				Application.LoadLevel("Menu");
 			}
 			
-		}
+		}*/
 	} 
 
 	private void LoseBehaviour(){
@@ -121,6 +134,30 @@ public class GameLogic : MonoBehaviour {
 
 	}
 
+    public void AddScore(int blockType) {
+        if (blockType == 0)
+            currentScore += 25;
+        else if (blockType == 1)
+            currentScore += 75;
+        else if (blockType == 2)
+            currentScore += 125;
+        else if (blockType == 3)
+            currentScore += 250;
+
+        textCurrentScore.text = currentScore.ToString() + " SCORE";
+
+        if (currentScore >= scoreGoal) {
+            setVictory();
+        }
+
+    }
+
+    public void AddPenalty(int blockType)
+    {
+
+        blockGridLogic.SetMove();
+
+    }
 
 
 }

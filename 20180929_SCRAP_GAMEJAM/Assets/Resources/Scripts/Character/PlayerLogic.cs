@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class PlayerLogic: MonoBehaviour {
 
 
-	public enum PlayerStates {IDLE, DAMAGE, EAT, DIE, DIG}
+	public enum PlayerStates {IDLE, DAMAGE, EAT, DIE, DIG, THROW_BULLET}
 	public PlayerStates state;
 
 	private GameLogic gameLogic;
@@ -20,13 +20,14 @@ public class PlayerLogic: MonoBehaviour {
 	public Transform explosionPowerUp;
 	public Text humanityText;
 	public AudioManager audioManger;
-	public Transform sourceBullets;
+	public SourceMovement sourceBullets;
 	public Animator animatorCharacter;
 	public SpriteRenderer spriteGlow;
 
+    public BoxCollider colliderDig;
 
 	public Sprite[] pieces;
-	public Image piece1, piece2, piece3;
+	public Image piece1, piece2, piece3, piece4, piece5;
 
 	private float temp;
 
@@ -43,31 +44,38 @@ public class PlayerLogic: MonoBehaviour {
 		piecesChar = new Queue<int>();
 		humanityPlayer = humanityIniPlayer;
 		tempHumanity = tempHumanityIni;
-		humanityText.enabled = false;
+		humanityText.enabled = true;
 		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
-		setIdle();
+        piece5.sprite = null;
+        piece5.color = new Color(0, 0, 0, 0);
+        setIdle();
 	}
 
 
-	void Update(){
+    void Update()
+    {
 
-		switch(state){
-		case PlayerStates.IDLE:
-			IdleBehaviour();
-			break;
-		case PlayerStates.DAMAGE:
-			DamageBehaviour();
-			break;
-		case PlayerStates.EAT:
-			EatBehaviour();
-			break;
+        switch (state)
+        {
+            case PlayerStates.IDLE:
+                IdleBehaviour();
+                break;
+            case PlayerStates.DAMAGE:
+                DamageBehaviour();
+                break;
+            case PlayerStates.EAT:
+                EatBehaviour();
+                break;
             case PlayerStates.DIG:
                 DigBehaviour();
                 break;
+            case PlayerStates.THROW_BULLET:
+                ThrowBulletBehaviour();
+                break;
             case PlayerStates.DIE:
-			DieBehaviour();
-			break;
-		}
+                DieBehaviour();
+                break;
+        }
 
 
         // BOTON PARA TRANSFORMAR
@@ -77,16 +85,21 @@ public class PlayerLogic: MonoBehaviour {
             audioManger.Play(audioManger.Shoot, transform.position);
             setDig();
         }
-        else {
-           // animatorCharacter.SetBool("isDig", false);
+        else
+        {
+            // animatorCharacter.SetBool("isDig", false);
             setIdle();
         }
 
+        if (Input.GetButton("Fire2"))
+        {
+            setThrowBullet();
+        }
     }
-
 	// END TRANSMUTATE
 
 	public void setIdle(){
+        colliderDig.enabled = false;
         animatorCharacter.SetBool("isDig", false);
         transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 		state = PlayerStates.IDLE;
@@ -102,10 +115,17 @@ public class PlayerLogic: MonoBehaviour {
 
     public void setDig()
     {
-        
-        animatorCharacter.SetBool("isDig", true);
 
-        state = PlayerStates.DIG;
+        if (piecesChar.Count < 4)
+        {
+            animatorCharacter.SetBool("isDig", true);
+            CameraShake.Shake(Vector3.one*0.25f, 0.25f);
+            colliderDig.enabled = true;
+            state = PlayerStates.DIG;
+        }
+        else {
+            setIdle();
+        }
     }
 
 
@@ -145,10 +165,10 @@ public class PlayerLogic: MonoBehaviour {
 	}
 
 	public void setDie(){
-		transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
+		//transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 		
-			animatorCharacter.SetBool("isDie", true);
-			animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.5f, animatorCharacter.transform.localPosition.z); 
+			//animatorCharacter.SetBool("isDie", true);
+			//animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.5f, animatorCharacter.transform.localPosition.z); 
 		
 		
 		audioManger.Play (audioManger.shotBulletBoss,transform.position);
@@ -166,6 +186,119 @@ public class PlayerLogic: MonoBehaviour {
 		state = PlayerStates.DIE;
 	}
 
+    public void setThrowBullet() {
+
+        
+        if (piecesChar.Count > 0 && sourceBullets.state == SourceMovement.PlayerAttackStates.NONE)
+        {
+            temp = 2;
+            // SI SUPERA LAS PIEZAS A ACUMULAR SE QUITA LA ULTIMA
+            int pieceMode = piecesChar.Dequeue();
+
+            if (piecesChar.Count == 3) {
+                piece4.sprite = null;
+            } else if (piecesChar.Count == 2) {
+                piece3.sprite = null;
+            } else if (piecesChar.Count == 1)
+            {
+                piece2.sprite = null;
+            }
+            else if (piecesChar.Count == 0)
+            {
+                piece1.sprite = null;
+                piece5.sprite = null;
+                piece5.color = new Color(0, 0, 0, 0);
+            }
+
+            int i = 0;
+            foreach (int piece in piecesChar)
+            {
+                
+                if (i == 0)
+                {
+
+                    if (piece == 0)
+                        piece1.sprite = pieces[0];
+
+
+                    if (piece == 1)
+                        piece1.sprite = pieces[1];
+
+                    if (piece == 2)
+                        piece1.sprite = pieces[2];
+
+                    if (piece == 3)
+                        piece1.sprite = pieces[3];
+
+                    piece1.color = new Color(1, 1, 1, 1);
+                }
+
+                if (i == 1)
+                {
+
+                    if (piece == 0)
+                        piece2.sprite = pieces[0];
+
+                    if (piece == 1)
+                        piece2.sprite = pieces[1];
+
+                    if (piece == 2)
+                        piece2.sprite = pieces[2];
+
+                    if (piece == 3)
+                        piece2.sprite = pieces[3];
+
+
+                    piece2.color = new Color(1, 1, 1, 1);
+                }
+
+                if (i == 2)
+                {
+
+                    if (piece == 0)
+                        piece3.sprite = pieces[0];
+
+                    if (piece == 1)
+                        piece3.sprite = pieces[1];
+
+                    if (piece == 2)
+                        piece3.sprite = pieces[2];
+
+                    if (piece == 3)
+                        piece3.sprite = pieces[3];
+
+                    piece3.color = new Color(1, 1, 1, 1);
+                }
+
+                if (i == 3)
+                {
+
+                    if (piece == 0)
+                        piece4.sprite = pieces[0];
+
+                    if (piece == 1)
+                        piece4.sprite = pieces[1];
+
+                    if (piece == 2)
+                        piece4.sprite = pieces[2];
+
+                    if (piece == 3)
+                        piece4.sprite = pieces[3];
+
+                    piece4.color = new Color(1, 1, 1, 1);
+                }
+                i++;
+            }
+
+            humanityText.text = piecesChar.Count.ToString();
+            sourceBullets.setRange(pieceMode);
+            animatorCharacter.SetBool("isShoot", true);
+            state = PlayerStates.THROW_BULLET;
+        }
+        else {
+            setIdle();
+        }
+    }
 
 	// BEHAVIOURS
 	private void DamageBehaviour(){
@@ -191,7 +324,13 @@ public class PlayerLogic: MonoBehaviour {
 
     private void DigBehaviour()
     {
- 
+        temp -= Time.deltaTime;
+
+
+        if (temp < 0)
+        {
+            setIdle();
+        }
     }
 
     private void DieBehaviour(){
@@ -204,23 +343,16 @@ public class PlayerLogic: MonoBehaviour {
 		}
 	}
 
+    private void ThrowBulletBehaviour()
+    {
 
-	void OnTriggerEnter(Collider other){
+    }
+
+
+    void OnTriggerEnter(Collider other){
 
 		if(other.tag == "EnemyDamage"){
 			setDamage();
-		}
-
-		if(other.tag == "BossPiece"){
-
-			if (other.name.Contains("Base")){
-				addPiece(0);
-			} else if (other.name.Contains("Melee")){
-				addPiece(1);
-			} 
-				setEat();
-				audioManger.Play(audioManger.catchPieceBoss,transform.position);
-				Destroy(other.gameObject);
 		}
 
 		if(other.tag == "PowerUp"){
@@ -231,16 +363,21 @@ public class PlayerLogic: MonoBehaviour {
 
 	}
 
-	private void addPiece(int idPiece){
+	public void addPiece(int idPiece){
 	
-		// SI SUPERA LAS PIEZAS A ACUMULAR SE QUITA LA ULTIMA
-		if(piecesChar.Count > 2)
-			piecesChar.Dequeue();
+
 
 		// ADD PIECE
 		piecesChar.Enqueue(idPiece);
 
-		string text = "Pieces: ";
+        if (piecesChar.Count == 1)
+        {
+            piece5.sprite = pieces[4];
+            piece5.color = new Color(1, 1, 0, 1);
+        }
+
+
+        string text = "Pieces: ";
 		int i = 0;
 		foreach ( int piece in piecesChar ){
 			text = text + piece.ToString();
@@ -253,7 +390,13 @@ public class PlayerLogic: MonoBehaviour {
 				if(piece == 1)
 				piece1.sprite = pieces[1];
 
-				piece1.color = new Color(1,1,1,1);
+                if (piece == 2)
+                    piece1.sprite = pieces[2];
+
+                if (piece == 3)
+                    piece1.sprite = pieces[3];
+
+                piece1.color = new Color(1,1,1,1);
 			}
 
 			if(i==1){
@@ -264,8 +407,13 @@ public class PlayerLogic: MonoBehaviour {
 				if(piece == 1)
 					piece2.sprite = pieces[1];
 
+                if (piece == 2)
+                    piece2.sprite = pieces[2];
 
-					piece2.color = new Color(1,1,1,1);
+                if (piece == 3)
+                    piece2.sprite = pieces[3];
+
+                piece2.color = new Color(1,1,1,1);
 			}
 
 			if(i==2){
@@ -275,12 +423,38 @@ public class PlayerLogic: MonoBehaviour {
 
 				if(piece == 1)
 					piece3.sprite = pieces[1];
-					piece3.color = new Color(1,1,1,1);
+
+                if (piece == 2)
+                    piece3.sprite = pieces[2];
+
+                if (piece == 3)
+                    piece3.sprite = pieces[3];
+
+                piece3.color = new Color(1,1,1,1);
 			}
-			i++;
+
+            if (i == 3)
+            {
+
+                if (piece == 0)
+                    piece4.sprite = pieces[0];
+
+                if (piece == 1)
+                    piece4.sprite = pieces[1];
+
+                if (piece == 2)
+                    piece4.sprite = pieces[2];
+
+                if (piece == 3)
+                    piece4.sprite = pieces[3];
+                piece4.color = new Color(1, 1, 1, 1);
+            }
+            i++;
 		}
 
-		Debug.Log (piecesChar.Count+" "+piecesChar.ToString());
+       // humanityText.text = piecesChar.Count.ToString();
+
+        Debug.Log (piecesChar.Count+" "+piecesChar.ToString());
 	}
 
 	private void Transmutate(){

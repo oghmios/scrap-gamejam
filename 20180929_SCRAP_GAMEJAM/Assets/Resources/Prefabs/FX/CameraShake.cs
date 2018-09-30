@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace Ferr {
+
 	public class CameraShake : MonoBehaviour {
 		#region Singleton
 		private static CameraShake instance = null;
@@ -49,4 +49,3 @@ namespace Ferr {
 			Instance.curve   = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1,0));
 		}
 	}
-}

@@ -4,25 +4,21 @@ using System.Collections;
 public class SourceMovement : MonoBehaviour {
 
 	public enum PlayerAttackStates {NONE, RANGE}
-
 	public PlayerAttackStates state;
 
 	private float temp;
 	public float tempMeleeIni;
 	public float tempRangeIni;
-	public Transform bullet;
+	public Transform[] bullet;
 	public Animator animatorCharacter;
 	public AudioManager audioManger;
 	public PlayerLogic playerLogic;
-	public BoxCollider meleeCollider;
+    private int typeBullet;
 
 	public bool isMelee;
 
 	void Start(){
-		isMelee = true;
-		meleeCollider = GetComponent<BoxCollider>();
-		meleeCollider.enabled = false;
-
+        typeBullet = 0;
         temp = 0;
         setNone();
 
@@ -45,12 +41,11 @@ public class SourceMovement : MonoBehaviour {
         state = PlayerAttackStates.NONE;
 	}
 
-	public void setRange(){
+	public void setRange(int modeBullet){
 		
 		temp = tempRangeIni;
 
-        animatorCharacter.SetBool("isShoot", true);
-        StartCoroutine("ThrowGarbage");
+        StartCoroutine("ThrowGarbage", modeBullet);
         
         // bulletAux.GetComponent<Rigidbody>().velocity = bulletAux.transform.right * 15f;
 
@@ -60,11 +55,11 @@ public class SourceMovement : MonoBehaviour {
 		
 	}
 
-    IEnumerator ThrowGarbage()
+    IEnumerator ThrowGarbage(int modeAux)
     {
         yield return new WaitForSeconds(.225f);
-        GameObject bulletAux = (GameObject)Instantiate(bullet.gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
-        bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x, 6, 0) * 200);
+        GameObject bulletAux = (GameObject)Instantiate(bullet[modeAux].gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
+        bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x, 5, 0) * 1000);
         Destroy(bulletAux, 4f);
         
         
@@ -72,10 +67,9 @@ public class SourceMovement : MonoBehaviour {
 
 
     private void NoneBehaviour(){
-		if(Input.GetButton("Fire2") && temp<=0)
-        {
-				setRange();
-		}
+		
+			//	setRange();
+	
 	}
 
 	private void RangeBehaviour(){

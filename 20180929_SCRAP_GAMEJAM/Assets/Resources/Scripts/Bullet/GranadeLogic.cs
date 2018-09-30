@@ -7,10 +7,11 @@ public class GranadeLogic: MonoBehaviour {
 	public Transform prefabPSDamage;
 	public Transform prefabPSFire;
 	public AudioManager audioManger;
+    public int typeBullet;
 	// Use this for initialization
 	void Start () {
-	
-		myTransform = this.transform;
+        
+        myTransform = this.transform;
 
 	}
 	
@@ -26,6 +27,7 @@ public class GranadeLogic: MonoBehaviour {
 
 		GameObject prefabFire = (GameObject) Instantiate(prefabPSFire.gameObject, new Vector3(transform.position.x, transform.position.y,-2), Quaternion.identity);
 		Destroy(prefabFire,1);
+
 
 		if(other.tag == "Boss"){
 

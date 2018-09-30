@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public class ContainerLogic : MonoBehaviour {
+public class ContainerLogic : MonoBehaviour
+{
 
     public enum ContainerLogicStates { SLEEP, OPEN, CLOSE, ALWAYSOPEN };
     public ContainerLogicStates state;
@@ -17,16 +18,19 @@ public class ContainerLogic : MonoBehaviour {
     public float timeOpened;
     private float timeSleepDecay;
     private float timeOpenedDecay;
+    private GameLogic gameLogic;
 
-
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
+        gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         timeSleepDecay = timeSleep;
         timeOpenedDecay = timeOpened;
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
 
         switch (state)
         {
@@ -76,7 +80,7 @@ public class ContainerLogic : MonoBehaviour {
     {
         timeSleepDecay -= Time.deltaTime;
 
-        if(timeSleepDecay < 0)
+        if (timeSleepDecay < 0)
         {
             SetOpen();
         }
@@ -86,7 +90,7 @@ public class ContainerLogic : MonoBehaviour {
     {
         timeOpenedDecay -= Time.deltaTime;
 
-        if(timeOpenedDecay < 0)
+        if (timeOpenedDecay < 0)
         {
             SetClose();
         }
@@ -100,7 +104,7 @@ public class ContainerLogic : MonoBehaviour {
         float randomTime = random.Next(0, randomChange);
         float upOrDown = random.Next(0, 2);
 
-        if(upOrDown == 0)
+        if (upOrDown == 0)
         {
             timeSleepDecay = timeSleep - randomTime;
         }
@@ -125,5 +129,24 @@ public class ContainerLogic : MonoBehaviour {
     void AlwaysOpenBehaviour()
     {
 
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+       
+        if (other.tag == "Bullet")
+        {
+            
+            if (other.GetComponent<GranadeLogic>()!=null && typeOfBlock == other.GetComponent<GranadeLogic>().typeBullet)
+            {
+                Destroy(other.gameObject);
+                gameLogic.AddScore(typeOfBlock);
+            }
+            else {
+                // PENALIZA SCORE
+                Destroy(other.gameObject);
+                gameLogic.AddPenalty(typeOfBlock);
+            }
+        }
     }
 }

@@ -17,7 +17,6 @@ public class BlockGridLogic : MonoBehaviour {
     private Vector3 position2Move;
     public float time2Move;
     private float timeDecay;
-    
 
     // Use this for initialization
     void Start () {
@@ -29,7 +28,7 @@ public class BlockGridLogic : MonoBehaviour {
         {
             lineOfBlocks[j] = new GameObject[10];
             int maxOfCoin = 0;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 8; i++)
             {
                 
                 int randomType = randomBlockNumber.Next(0, randomMax);
@@ -44,12 +43,12 @@ public class BlockGridLogic : MonoBehaviour {
                 //lineOfBlocks[j][i] = new GameObject();
                 lineOfBlocks[j][i] = (GameObject)Instantiate(blockTypes[randomType], position2Move, rotation);
                 lineOfBlocks[j][i].transform.parent = transform;
-                position2Move.x += 3;
+                position2Move.x += 4.5f;
                 //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
 
             }
             position2Move.x = transform.position.x;
-            position2Move.y -= 3;
+            position2Move.y -= 4;
             maxOfCoin = 0;
             randomMax = 4;
             //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
@@ -102,7 +101,8 @@ public class BlockGridLogic : MonoBehaviour {
     }
 
     public void SetMove() {
-        
+
+        CameraShake.Shake(Vector3.one, 0.5f);
         state = BlockGridLogicStates.MOVE;
     }
 
