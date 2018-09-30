@@ -454,7 +454,7 @@ public class PlayerLogic: MonoBehaviour {
 
        // humanityText.text = piecesChar.Count.ToString();
 
-        Debug.Log (piecesChar.Count+" "+piecesChar.ToString());
+        // Debug.Log (piecesChar.Count+" "+piecesChar.ToString());
 	}
 
 	private void Transmutate(){

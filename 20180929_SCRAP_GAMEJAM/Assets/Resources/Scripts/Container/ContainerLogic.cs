@@ -19,6 +19,7 @@ public class ContainerLogic : MonoBehaviour
     private float timeSleepDecay;
     private float timeOpenedDecay;
     private GameLogic gameLogic;
+    public ParticleSystem ps;
 
     // Use this for initialization
     void Start()
@@ -144,9 +145,10 @@ public class ContainerLogic : MonoBehaviour
             }
             else {
                 // PENALIZA SCORE
+                ps.Play();
                 Destroy(other.gameObject);
                 gameLogic.AddPenalty(typeOfBlock);
-                GetComponent<ParticleSystem>().Play();
+                
 
             }
         }
