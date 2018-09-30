@@ -48,7 +48,7 @@ public class BlockGridLogic : MonoBehaviour {
 
             }
             position2Move.x = transform.position.x;
-            position2Move.y -= 4;
+            position2Move.y -= 4.5f;
             maxOfCoin = 0;
             randomMax = 4;
             //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
@@ -134,7 +134,7 @@ public class BlockGridLogic : MonoBehaviour {
     void MoveBehaviour()
     {
 
-        transform.Translate(Vector3.up * Time.deltaTime);
+        transform.Translate(Vector3.up * Time.deltaTime  * 2.2f);
         timeDecay -= Time.deltaTime;
 
         if (timeDecay < 0)

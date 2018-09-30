@@ -146,6 +146,8 @@ public class ContainerLogic : MonoBehaviour
                 // PENALIZA SCORE
                 Destroy(other.gameObject);
                 gameLogic.AddPenalty(typeOfBlock);
+                GetComponent<ParticleSystem>().Play();
+
             }
         }
     }
