@@ -11,7 +11,7 @@ public class MenuLogic : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetButton("Jump"))
-			Application.LoadLevel ("Level 1");
+			Application.LoadLevel ("Game");
 
 		if (Input.GetKey(KeyCode.Escape))
 			Application.Quit();
