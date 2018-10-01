@@ -383,7 +383,7 @@ public class PlayerLogic: MonoBehaviour {
         if (piecesChar.Count == 1)
         {
             piece5.sprite = pieces[4];
-            piece5.color = new Color(1, 1, 0, 1);
+            piece5.color = new Color(1, 1, 1, 1);
         }
 
 

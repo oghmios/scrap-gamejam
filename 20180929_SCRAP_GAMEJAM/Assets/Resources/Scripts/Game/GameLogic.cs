@@ -96,6 +96,9 @@ public class GameLogic : MonoBehaviour {
         if (player.state != PlayerLogic.PlayerStates.DIE)
         player.setDie();
 
+        player.transform.GetComponent<MoveCharacter>().enabled = false;
+        player.enabled = false;
+
         temp = 5;
 
 		state = GameStates.LOSE;
