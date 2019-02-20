@@ -20,6 +20,7 @@ public class ContainerLogic : MonoBehaviour
     private float timeOpenedDecay;
     private GameLogic gameLogic;
     public ParticleSystem ps;
+    public Rigidbody rbJoin;
 
     // Use this for initialization
     void Start()
@@ -141,11 +142,13 @@ public class ContainerLogic : MonoBehaviour
             
             if (other.GetComponent<GranadeLogic>()!=null && typeOfBlock == other.GetComponent<GranadeLogic>().typeBullet)
             {
+                rbJoin.AddForce(other.transform.position);
                 Destroy(other.gameObject);
                 audioManger.Play(audioManger.playerLaughtShort, transform.position);
                 gameLogic.AddScore(typeOfBlock);
             }
             else {
+                rbJoin.AddForce(other.transform.position);
                 audioManger.Play(audioManger.damagePlayer, transform.position);
                 // PENALIZA SCORE
                 ps.Play();

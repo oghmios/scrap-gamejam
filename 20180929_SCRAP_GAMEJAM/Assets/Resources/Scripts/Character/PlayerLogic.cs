@@ -23,6 +23,7 @@ public class PlayerLogic: MonoBehaviour {
 	public SourceMovement sourceBullets;
 	public Animator animatorCharacter;
 	public SpriteRenderer spriteCharacter;
+    public UIChangeColor colorIntenvory;
 
     public BoxCollider colliderDig;
 
@@ -44,7 +45,7 @@ public class PlayerLogic: MonoBehaviour {
 		piecesChar = new Queue<int>();
 		humanityPlayer = humanityIniPlayer;
 		tempHumanity = tempHumanityIni;
-		humanityText.enabled = true;
+		//humanityText.enabled = true;
 		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         piece5.sprite = null;
         piece5.color = new Color(0, 0, 0, 0);
@@ -125,6 +126,7 @@ public class PlayerLogic: MonoBehaviour {
             state = PlayerStates.DIG;
         }
         else {
+            colorIntenvory.setAnimation();
             setIdle();
         }
     }
@@ -298,7 +300,7 @@ public class PlayerLogic: MonoBehaviour {
                 i++;
             }
 
-            humanityText.text = piecesChar.Count.ToString();
+            // humanityText.text = piecesChar.Count.ToString();
             sourceBullets.setRange(pieceMode);
             animatorCharacter.SetBool("isShoot", true);
             state = PlayerStates.THROW_BULLET;
