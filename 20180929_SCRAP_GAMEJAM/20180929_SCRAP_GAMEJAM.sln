@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio for Mac
+# Visual Studio 2017
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "20180929_SCRAP_GAMEJAM", "20180929_SCRAP_GAMEJAM.csproj", "{65ABE27F-513B-BC6A-70DC-B182536B9809}"
 EndProject
 Global
