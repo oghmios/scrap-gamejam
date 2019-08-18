@@ -7,6 +7,7 @@ public class DigLogic: MonoBehaviour {
 	private Transform myTransform;
 	public Transform prefabPSDamage;
 	public Transform prefabPSFire;
+    private GameObject prefabDamage;
 
 	public AudioManager audioManger;
     private BoxCollider boxColliderDig;
@@ -17,32 +18,25 @@ public class DigLogic: MonoBehaviour {
         playerLogic = transform.parent.transform.GetComponent<PlayerLogic>();
         boxColliderDig = GetComponent<BoxCollider>();
 		myTransform = this.transform;
-
-	}
-	
-	// Update is called once per frame
-	void Update () {
-
-
-	}
+        prefabDamage = (GameObject)Instantiate(prefabPSDamage.gameObject, new Vector3(transform.position.x, transform.position.y, -2), Quaternion.identity);
+        prefabDamage.GetComponent<ParticleSystem>().Stop();
+    }
 
 	void OnTriggerEnter(Collider other){
 
-		//GameObject prefabFire = (GameObject) Instantiate(prefabPSFire.gameObject, new Vector3(transform.position.x, transform.position.y,-2), Quaternion.identity);
-		//Destroy(prefabFire,1);
-
 		if(other.tag == "Block"){
-            boxColliderDig.enabled = false;
-            playerLogic.addPiece(other.GetComponent<BlockLogic>().type);
-            audioManger.Play(audioManger.catchPieceBoss, transform.position);
-            Destroy(other.gameObject);
-				// Instanciamos daño
-			/*	GameObject prefabDamage = (GameObject) Instantiate(prefabPSDamage.gameObject,new Vector3(transform.position.x, transform.position.y,-2), Quaternion.identity);
-				Destroy(prefabDamage,1);
-				audioManger.Play(audioManger.impactBoss,transform.position);
-				other.GetComponent<BossLogic>().addDamage(damage);
-				*/
+            // IF IS NOT A HEAVY ROCK YOU CAN DIG
+            if (other.GetComponent<BlockLogic>().type <= 3)
+            {
 
+                boxColliderDig.enabled = false;
+                prefabDamage.transform.position = new Vector3(myTransform.position.x, myTransform.position.y - 1, myTransform.position.z);
+                prefabDamage.GetComponent<ParticleSystem>().Play();
+                playerLogic.addPiece(other.GetComponent<BlockLogic>().type);
+
+                audioManger.Play(audioManger.catchPieceBoss, transform.position);
+                Destroy(other.gameObject);
+            }
 		}
 
 	}

@@ -10,51 +10,19 @@ public class BlockGridLogic : MonoBehaviour {
     public BlockGridLogicStates state;
 
     public GameObject[] blockTypes;
-    public GameObject[][] lineOfBlocks = new GameObject[10][];
-    public Quaternion rotation;
+    public GameObject blockHeavy;
+    public GameObject[][] lineOfBlocks; // = new GameObject[10][];
+    private Quaternion rotation;
     private System.Random randomBlockNumber;
     private Vector3 lineMovement;
     private Vector3 position2Move;
-    public float time2Move;
-    private float timeDecay;
+    private float timeDecay, time2Move;
+    private Transform myTransform;
 
     // Use this for initialization
     void Start () {
-        randomBlockNumber = new System.Random();
-        position2Move = transform.position;
-        int randomMax = 4;
-        timeDecay = time2Move;
-        for(int j = 0; j < 10; j++)
-        {
-            lineOfBlocks[j] = new GameObject[10];
-            int maxOfCoin = 0;
-            for (int i = 0; i < 8; i++)
-            {
-                
-                int randomType = randomBlockNumber.Next(0, randomMax);
-                if(randomType == 3)
-                {
-                    maxOfCoin++;
-                }
-                if(maxOfCoin == 2)
-                {
-                    randomMax = 3;
-                }
-                //lineOfBlocks[j][i] = new GameObject();
-                lineOfBlocks[j][i] = (GameObject)Instantiate(blockTypes[randomType], position2Move, rotation);
-                lineOfBlocks[j][i].transform.parent = transform;
-                position2Move.x += 4.5f;
-                //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
-
-            }
-            position2Move.x = transform.position.x;
-            position2Move.y -= 4.5f;
-            maxOfCoin = 0;
-            randomMax = 4;
-            //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
-        }
-        //slineMovement.y = 3;
-
+        myTransform = transform;
+        position2Move = myTransform.position;
 
     }
     void Update()
@@ -78,8 +46,64 @@ public class BlockGridLogic : MonoBehaviour {
         }
         
     }
-
     // SETS
+
+    public void setCreateBlocks(int numRows, int numColumns, int numHeavyRows, float time2MoveAux) {
+        randomBlockNumber = new System.Random();
+
+        int randomMax = blockTypes.Length;
+        time2Move = time2MoveAux;
+        timeDecay = time2Move;
+
+        lineOfBlocks = new GameObject[numRows+ numHeavyRows][];
+
+        for (int j = 0; j < numRows; j++)
+        {
+            lineOfBlocks[j] = new GameObject[numRows+ numHeavyRows];
+            int maxOfCoin = 0;
+            for (int i = 0; i < numColumns; i++)
+            {
+
+                int randomType = randomBlockNumber.Next(0, randomMax);
+                if (randomType == 3)
+                {
+                    maxOfCoin++;
+                }
+                if (maxOfCoin == 2)
+                {
+                    randomMax = 3;
+                }
+                //lineOfBlocks[j][i] = new GameObject();
+                lineOfBlocks[j][i] = (GameObject)Instantiate(blockTypes[randomType], position2Move, rotation);
+                lineOfBlocks[j][i].transform.parent = myTransform;
+                position2Move.x += 4.5f;
+                //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
+
+            }
+            position2Move.x = myTransform.position.x;
+            position2Move.y -= 4.5f;
+            maxOfCoin = 0;
+            randomMax = blockTypes.Length;
+            //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
+            
+        }
+
+        // CREATION OF HEAVY BLOCKS (CAN'T DIG)
+        for (int j = numRows; j < numRows+ numHeavyRows; j++)
+        {
+            lineOfBlocks[j] = new GameObject[numRows + numHeavyRows];
+            for (int i = 0; i < numColumns ; i++)
+            {
+                lineOfBlocks[j][i] = (GameObject)Instantiate(blockHeavy, position2Move, rotation);
+                lineOfBlocks[j][i].transform.parent = myTransform;
+                position2Move.x += 4.5f;
+
+            }
+            position2Move.x = myTransform.position.x;
+            position2Move.y -= 4.5f;
+        }
+        //slineMovement.y = 3;
+    }
 
 
     public void SetNone()
@@ -96,7 +120,7 @@ public class BlockGridLogic : MonoBehaviour {
     public void SetPrepare()
     {
         timeDecay = 2;
-        lineMovement = transform.position;
+        lineMovement = myTransform.position;
         state = BlockGridLogicStates.PREPARE;
     }
 
@@ -134,7 +158,7 @@ public class BlockGridLogic : MonoBehaviour {
     void MoveBehaviour()
     {
 
-        transform.Translate(Vector3.up * Time.deltaTime);
+        myTransform.Translate(Vector3.up * Time.deltaTime);
         timeDecay -= Time.deltaTime;
 
         if (timeDecay < 0)
