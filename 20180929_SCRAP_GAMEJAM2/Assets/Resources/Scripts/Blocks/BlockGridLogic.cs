@@ -14,7 +14,6 @@ public class BlockGridLogic : MonoBehaviour {
     public GameObject[][] lineOfBlocks; // = new GameObject[10][];
     private Quaternion rotation;
     private System.Random randomBlockNumber;
-    private Vector3 lineMovement;
     private Vector3 position2Move;
     private float timeDecay, time2Move;
     private Transform myTransform;
@@ -102,7 +101,7 @@ public class BlockGridLogic : MonoBehaviour {
             position2Move.x = myTransform.position.x;
             position2Move.y -= 4.5f;
         }
-        //slineMovement.y = 3;
+        
     }
 
 
@@ -120,7 +119,7 @@ public class BlockGridLogic : MonoBehaviour {
     public void SetPrepare()
     {
         timeDecay = 2;
-        lineMovement = myTransform.position;
+        
         state = BlockGridLogicStates.PREPARE;
     }
 

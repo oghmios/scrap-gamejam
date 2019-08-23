@@ -13,7 +13,6 @@ public class PlayerLogic: MonoBehaviour {
 	public float lifeIniPlayer;
 	public float humanityIniPlayer;
 	private float lifePlayer;
-	private float humanityPlayer;
 	public Transform lifePlayerImage;
 	public Transform playerLights;
 	public Transform explosionPlayer;
@@ -34,7 +33,7 @@ public class PlayerLogic: MonoBehaviour {
 	private float temp;
 
 	public float tempHumanityIni;
-	private float tempHumanity;
+	// private float tempHumanity;
 
 	public Queue<int> piecesChar; 
 
@@ -56,8 +55,7 @@ public class PlayerLogic: MonoBehaviour {
         gravityOrig = moveCharacter.gravity;
         audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
 		piecesChar = new Queue<int>();
-		humanityPlayer = humanityIniPlayer;
-		tempHumanity = tempHumanityIni;
+		// tempHumanity = tempHumanityIni;
 		//humanityText.enabled = true;
 		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         pieceGlow.sprite = null;

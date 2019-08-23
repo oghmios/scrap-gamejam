@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class MenuLogic : MonoBehaviour {
 
@@ -11,7 +12,7 @@ public class MenuLogic : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetButton("Jump"))
-			Application.LoadLevel ("Level 1");
+            SceneManager.LoadScene("Level 1");
 
 		if (Input.GetKey(KeyCode.Escape))
 			Application.Quit();

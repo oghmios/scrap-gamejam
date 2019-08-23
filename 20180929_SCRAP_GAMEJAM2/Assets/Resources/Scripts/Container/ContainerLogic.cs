@@ -147,7 +147,8 @@ public class ContainerLogic : MonoBehaviour
             if (other.GetComponent<GranadeLogic>()!=null && typeOfBlock == other.GetComponent<GranadeLogic>().typeBullet)
             {
                 rbJoin.AddForce(other.transform.position);
-                Destroy(other.gameObject);
+                other.GetComponent<BulletDestroyScript>().DestroyBall();
+               // Destroy(other.gameObject);
                 audioManger.Play(audioManger.playerLaughtShort, transform.position);
 
                 if (typeOfBlock == 0)
@@ -189,7 +190,8 @@ public class ContainerLogic : MonoBehaviour
                 // PENALIZA SCORE
                 ps.Play();
                 
-                Destroy(other.gameObject);
+                //Destroy(other.gameObject);
+                other.GetComponent<BulletDestroyScript>().DestroyBall();
                 gameLogic.AddPenalty(typeOfBlock);
                 
 

@@ -11,14 +11,12 @@ public class MoveCharacter : MonoBehaviour {
 	// private CharacterController controller;
 	private bool isJump;
 	public bool isGround;
-	private bool aircontrol;
 	public Transform checkGround;
 	public Transform colliderHitsRight;
 	public Transform colliderHitsLeft;
 	public Transform bulletSource;
 	public LayerMask groundMask;
 	public LayerMask groundDamageMask;
-	private GameLogic gameLogic;
 	public AudioManager audioManger;
 	public SpriteRenderer spriteCharacter;
 	public Rigidbody rigid;
@@ -33,10 +31,8 @@ public class MoveCharacter : MonoBehaviour {
     private void Start(){
         horizontalControl = true;
         rigid = GetComponent<Rigidbody>();
-		isJump = false;
-		aircontrol = true;
+        isJump = false;
 		audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
-		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
 		// controller = GetComponent<CharacterController>();
 		moveDirection.y = 0;
 	}

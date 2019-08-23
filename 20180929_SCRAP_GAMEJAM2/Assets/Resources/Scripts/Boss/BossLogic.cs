@@ -17,9 +17,9 @@ public class BossLogic: MonoBehaviour {
 	public float speed = 6.0F;
 	public float jumpSpeed = 8.0F;
 	public float gravity = 20.0F;
-	private Vector3 moveDirection = Vector3.zero;
+	// private Vector3 moveDirection = Vector3.zero;
 	//private CharacterController controller;
-	private GameLogic gameLogic;
+	// private GameLogic gameLogic;
 	private Transform player;
 	public Transform bulletSource;
 	public Transform[] pieceBoss;
@@ -27,10 +27,10 @@ public class BossLogic: MonoBehaviour {
 	private bool isKill;
 	private float temp;
 	private float tempAttack;
-	private float tempSound;
+	//private float tempSound;
 	public float tempIniPatrol;
 	public AudioManager audioManger;
-	private Color colorAux;
+	// private Color colorAux;
 	private bool changeDir;
 	private BoxCollider damageCollider;
 
@@ -56,12 +56,12 @@ public class BossLogic: MonoBehaviour {
 		enemyTransform = this.transform;
 		changeDir = false;
 		life = lifeIni;
-		colorAux = Color.white;
+		// colorAux = Color.white;
 		isKill = false;
 		player = GameObject.FindGameObjectWithTag("Player").transform;
-		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
+		// gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
 		//controller = GetComponent<CharacterController>();
-		tempSound = 10.5f;
+		//tempSound = 10.5f;
 		// audioManger.Play(audioManger.bossIdle,transform.position);
 
 		if(mode == BossStates.IDLE)

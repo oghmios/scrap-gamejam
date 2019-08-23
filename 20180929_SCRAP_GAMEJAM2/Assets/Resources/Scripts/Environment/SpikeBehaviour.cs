@@ -2,14 +2,14 @@
 using System.Collections;
 
 public class SpikeBehaviour : MonoBehaviour {
-	private AudioManager audioManger;
+	//private AudioManager audioManger;
     private GameLogic gameLogic;
-    private PlayerLogic playerLogic;
+    //private PlayerLogic playerLogic;
 	// Use this for initialization
 	void Start () {
         gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
-        playerLogic = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
-        audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+        // playerLogic = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
+        //audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
 	}
 	
 	void OnTriggerEnter(Collider other){

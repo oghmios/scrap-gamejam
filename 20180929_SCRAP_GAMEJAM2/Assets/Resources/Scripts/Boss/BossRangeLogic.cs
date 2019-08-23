@@ -14,7 +14,6 @@ public class BossRangeLogic: MonoBehaviour {
 	public float speed = 6.0F;
 	public float jumpSpeed = 8.0F;
 	public float gravity = 20.0F;
-	private Vector3 moveDirection = Vector3.zero;
 	//private CharacterController controller;
 	private GameLogic gameLogic;
 	private Transform player;
@@ -25,7 +24,6 @@ public class BossRangeLogic: MonoBehaviour {
 	private float temp;
 	private float tempSound;
 	public AudioManager audioManger;
-	private Color colorAux;
 	private bool changeDir;
 
 	private void Start(){
@@ -33,7 +31,6 @@ public class BossRangeLogic: MonoBehaviour {
 		enemyTransform = this.transform;
 		changeDir = false;
 		life = lifeIni;
-		colorAux = Color.white;
 		isKill = false;
 		player = GameObject.FindGameObjectWithTag("Player").transform;
 		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();

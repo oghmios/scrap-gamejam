@@ -52,7 +52,7 @@ public class GameLogic : MonoBehaviour {
     void Start () {
 		Cursor.visible = false;
         audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
-        PlayerPrefs.SetString("Level",Application.loadedLevelName);
+        PlayerPrefs.SetString("Level",SceneManager.GetActiveScene().name);
 		player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
         setStart();
 	}
@@ -106,7 +106,7 @@ public class GameLogic : MonoBehaviour {
         }
 
         if (Input.GetKeyDown(KeyCode.R)){
-			Application.LoadLevel(PlayerPrefs.GetString("Level"));
+            SceneManager.LoadScene(PlayerPrefs.GetString("Level"));
 		} 
 
 	}

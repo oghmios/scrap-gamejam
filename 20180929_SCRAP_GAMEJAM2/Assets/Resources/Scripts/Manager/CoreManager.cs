@@ -11,6 +11,7 @@
 *************************************************************************/
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 //[RequireComponent(typeof(GameManager))]
@@ -113,6 +114,6 @@ public class CoreManager : MonoBehaviour
 	void Start() {
 		PlayerPrefs.SetInt("Sound",1);
 
-		Application.LoadLevel("Menu");
+        SceneManager.LoadScene("Menu");
 	}
 }

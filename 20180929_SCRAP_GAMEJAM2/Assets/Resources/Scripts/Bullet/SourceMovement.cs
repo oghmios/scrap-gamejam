@@ -12,17 +12,15 @@ public class SourceMovement : MonoBehaviour {
 	public Animator animatorCharacter;
 	public AudioManager audioManger;
 	public PlayerLogic playerLogic;
-    private int typeBullet;
     private float forceExpulsionAux;
-	public bool isMelee;
     private float multiplyImpulse;
     public float minImpulse;
     public float maxImpulse;
     public float yForce = 5f;
 
-	void Start(){
+    void Start(){
+        
         forceExpulsionAux = 0;
-        typeBullet = 0;
         temp = 0;
         setNone();
 
@@ -49,8 +47,7 @@ public class SourceMovement : MonoBehaviour {
 		
 		temp = tempRangeIni;
         forceExpulsionAux = forceExpulsion;
-        StartCoroutine("ThrowGarbage", modeBullet);
-        
+         StartCoroutine("ThrowGarbage", modeBullet);
         // bulletAux.GetComponent<Rigidbody>().velocity = bulletAux.transform.right * 15f;
 
         audioManger.Play(audioManger.Shoot, transform.position);
@@ -58,7 +55,7 @@ public class SourceMovement : MonoBehaviour {
         state = PlayerAttackStates.RANGE;
 		
 	}
-
+    /*
     IEnumerator ThrowGarbage(int modeAux)
     {
         yield return new WaitForSeconds(.005f); // (.225f);
@@ -84,12 +81,54 @@ public class SourceMovement : MonoBehaviour {
         Destroy(bulletAux, 4f);
         
         
+    }*/
+
+
+    IEnumerator ThrowGarbage(int modeAux)
+    {
+        yield return new WaitForSeconds(.005f); // (.225f);
+        Debug.Log("forceExpulsionAux: " + forceExpulsionAux);
+       //  GameObject bulletAux = (GameObject)Instantiate(bullet[modeAux].gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
+
+         GameObject bulletAux = NewObjectPoolerScript.current.GetPooledObject(modeAux);
+
+        if (bulletAux == null) yield return null;
+
+        // OLD (MORE HORIZONTAL) new Vector3(transform.localPosition.x, 5f, 0) 
+        // forceExpulsionAux forceExpulsionAux <= 0.1f --> 700 --- forceExpulsionAux >= 0.4f --> 1100
+
+        if (forceExpulsionAux <= 0.1f)
+        {
+            multiplyImpulse = minImpulse;
+        }
+        else if (forceExpulsionAux >= 0.4f)
+        {
+            multiplyImpulse = maxImpulse;
+        }
+        else if (forceExpulsionAux > 0.1f && forceExpulsionAux < 0.4f)
+        {
+            multiplyImpulse = (((forceExpulsionAux - 0.1f) * (maxImpulse - minImpulse)) / 0.3f) + minImpulse;
+        }
+
+        
+        // RESET THE RIGIDBODY PROPERTIES
+        bulletAux.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        bulletAux.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        bulletAux.transform.rotation = Quaternion.Euler(Vector3.zero);
+
+        bulletAux.transform.position = transform.position; // new Vector3(transform.position.x, transform.position.y, transform.position.z);
+        bulletAux.transform.rotation = Quaternion.identity;
+
+        bulletAux.SetActive(true);
+
+        Debug.Log("MULTIPLIER: " + multiplyImpulse);
+        bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x, yForce, 0) * multiplyImpulse); // *1000);
+
+
+        
     }
 
-
     private void NoneBehaviour(){
-		
-			//	setRange();
 	
 	}
 

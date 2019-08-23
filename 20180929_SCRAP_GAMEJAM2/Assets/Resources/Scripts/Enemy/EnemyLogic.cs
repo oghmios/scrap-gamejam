@@ -12,7 +12,7 @@ public class EnemyLogic: MonoBehaviour {
 	public Transform powerUpBullet;
 	public float speed = 6.0F;
 
-	private Vector3 moveDirection = Vector3.zero;
+	// private Vector3 moveDirection = Vector3.zero;
 
 
 	public Transform explosionBoss;
@@ -20,12 +20,12 @@ public class EnemyLogic: MonoBehaviour {
 	private float temp;
 	private float tempSound;
 
-	private Color colorAux;
+	// private Color colorAux;
 
 	private void Start(){
 
 		life = lifeIni;
-		colorAux = Color.white;
+		// colorAux = Color.white;
 		isKill = false;
 
 		setMove();
@@ -128,7 +128,7 @@ public class EnemyLogic: MonoBehaviour {
 		CoreManager.Audio.Play(CoreManager.Audio.enemyExplosion,transform.position);
 
 		GameObject explosionBossAux = (GameObject) Instantiate(explosionBoss.gameObject,transform.position, Quaternion.identity);
-		explosionBossAux.GetComponent<ParticleSystem>().startColor = Color.green;
+		// explosionBossAux.GetComponent<ParticleSystem>().startColor = Color.green;
 		Destroy(explosionBossAux,0.5f);
 
 		Destroy(gameObject);

@@ -4,7 +4,7 @@ using System.Collections;
 public class MeleeLogic: MonoBehaviour {
 
 	public float damage;
-	private Transform myTransform;
+	//private Transform myTransform;
 	public Transform prefabPSDamage;
 	public Transform prefabPSFire;
 
@@ -12,7 +12,7 @@ public class MeleeLogic: MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
-		myTransform = this.transform;
+		//myTransform = this.transform;
 
 	}
 	
