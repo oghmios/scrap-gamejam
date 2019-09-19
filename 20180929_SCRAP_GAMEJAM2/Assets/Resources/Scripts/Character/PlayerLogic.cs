@@ -8,16 +8,13 @@ public class PlayerLogic: MonoBehaviour {
 	public enum PlayerStates {IDLE, DAMAGE, EAT, DIE, DIG, DIG_TO_IDLE, DASHDOWN, DASHDOWN_DIG, THROW_BULLET, NONE}
 	public PlayerStates state;
 
-	private GameLogic gameLogic;
+    public string control;
+    private GameLogic gameLogic;
 	public Transform explosionBoss;
 	public float lifeIniPlayer;
-	public float humanityIniPlayer;
 	private float lifePlayer;
-	public Transform lifePlayerImage;
-	public Transform playerLights;
 	public Transform explosionPlayer;
 	public Transform explosionPowerUp;
-	public Text humanityText;
 	public AudioManager audioManger;
 	public SourceMovement sourceBullets;
     public MoveCharacter moveCharacter;
@@ -55,8 +52,6 @@ public class PlayerLogic: MonoBehaviour {
         gravityOrig = moveCharacter.gravity;
         audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
 		piecesChar = new Queue<int>();
-		// tempHumanity = tempHumanityIni;
-		//humanityText.enabled = true;
 		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         pieceGlow.sprite = null;
         pieceGlow.color = new Color(0, 0, 0, 0);
@@ -105,15 +100,16 @@ public class PlayerLogic: MonoBehaviour {
 
 
         // BOTON PARA TRANSFORMAR
-        if (Input.GetButton("Fire1") && moveCharacter.isGround && Time.time > nextFire && state == PlayerStates.IDLE && !Input.GetButton("Fire2"))
+        if ((hInput.GetButton("Dig"+control) || hInput.GetAxis("Dig" + control) > 0 || hInput.GetAxis("Dig" + control) < 0) && moveCharacter.isGround && Time.time > nextFire &&
+            state == PlayerStates.IDLE && ( !hInput.GetButton("Throw"+control) || hInput.GetAxis("Throw" + control) == 0))
         {
-            
+
             nextFire = Time.time + fireRate;
             
             setDig();
         }
-        else if (Input.GetButton("Fire1") && !moveCharacter.isGround && Time.time > nextFire 
-            && state == PlayerStates.IDLE && !Input.GetButton("Fire2"))
+        else if ((hInput.GetButton("Dig"+control) || hInput.GetAxis("Dig" + control) > 0 || hInput.GetAxis("Dig" + control) < 0) && !moveCharacter.isGround && Time.time > nextFire
+            && state == PlayerStates.IDLE && (!hInput.GetButton("Throw"+control) || hInput.GetAxis("Throw" + control) == 0))
         {
             
             nextFire = Time.time + fireRate;
@@ -127,8 +123,8 @@ public class PlayerLogic: MonoBehaviour {
             setIdle();
         }*/
 
-        if (Input.GetButtonDown("Fire2") && !isThrow && piecesChar.Count > 0)
-        {
+        if ((hInput.GetButtonDown("Throw"+control) || hInput.GetAxis("Throw" + control) < 0 || hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count > 0)
+            {
 
             isThrow = true;
             // rigid.velocity = Vector3.up * jumpSpeed;
@@ -137,12 +133,12 @@ public class PlayerLogic: MonoBehaviour {
             throwTimeCounter = throwTime;
         }
 
-        if (Input.GetButtonDown("Fire2") && !isThrow && piecesChar.Count <= 0)
+        if ((hInput.GetButtonDown("Throw"+control) || hInput.GetAxis("Throw" + control) < 0 || hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count <= 0)
         {
             colorIntenvory.setAnimation();
         }
 
-        if (isThrow && Input.GetButton("Fire2"))
+        if (isThrow && (hInput.GetButton("Throw"+control) || hInput.GetAxis("Throw" + control) < 0 || hInput.GetAxis("Throw" + control) > 0))
         {
             
             if (throwTimeCounter > 0)
@@ -165,7 +161,7 @@ public class PlayerLogic: MonoBehaviour {
 
             // Si se mantiene el lanzamiento y se da la tecla cavar, 
             // se cancela  el lanzamiento
-            if (Input.GetButton("Fire1"))
+            if (hInput.GetButton("Dig"+control) || hInput.GetAxis("Dig" + control) != 0)
             {
                 isThrow = false;
                 animatorCharacter.SetTrigger("IsThrow");
@@ -174,13 +170,14 @@ public class PlayerLogic: MonoBehaviour {
             }
         }
 
-        if (isThrow && Input.GetButtonUp("Fire2"))
+        if (isThrow && (hInput.GetButtonUp("Throw"+control) || hInput.GetAxis("Throw" + control) == 0))
         {
             //animatorCharacter.SetBool("IsPrepareThrow", false);
             setThrowBullet(throwTime - throwTimeCounter);
             isThrow = false;
             spriteCharacter.color = Color.white;
         }
+
     }
 	// END TRANSMUTATE
 
@@ -266,7 +263,6 @@ public class PlayerLogic: MonoBehaviour {
 		if(state != PlayerStates.DIE ){
 			lifePlayer--;
 			audioManger.Play (audioManger.damagePlayer,transform.position);
-			// lifePlayerImage.GetComponent<Renderer>().material.SetFloat("_Cutoff", 1-lifePlayer/lifeIniPlayer);
 			
 			transform.GetComponentInChildren<SpriteRenderer>().color = Color.red;
 			temp = 0.25f;
@@ -650,7 +646,6 @@ public class PlayerLogic: MonoBehaviour {
             i++;
 		}
 
-       // humanityText.text = piecesChar.Count.ToString();
 
         // Debug.Log (piecesChar.Count+" "+piecesChar.ToString());
 	}

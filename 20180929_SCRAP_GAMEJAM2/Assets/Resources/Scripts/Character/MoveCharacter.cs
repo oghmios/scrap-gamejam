@@ -4,11 +4,10 @@ using System.Collections;
 public class MoveCharacter : MonoBehaviour {
 
 
-	public float speed = 6.0F;
+    public string control;
+    public float speed = 6.0F;
 	public float jumpSpeed = 8.0F;
 	public float gravity = 20.0F;
-	private Vector3 moveDirection = Vector3.zero;
-	// private CharacterController controller;
 	private bool isJump;
 	public bool isGround;
 	public Transform checkGround;
@@ -33,8 +32,6 @@ public class MoveCharacter : MonoBehaviour {
         rigid = GetComponent<Rigidbody>();
         isJump = false;
 		audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
-		// controller = GetComponent<CharacterController>();
-		moveDirection.y = 0;
 	}
 
 
@@ -49,12 +46,12 @@ public class MoveCharacter : MonoBehaviour {
     void FixedUpdate()
     {
         if (horizontalControl)
-            horizontalDirection = Input.GetAxis("Horizontal");
+            horizontalDirection = hInput.GetAxis("Horizontal" + control);
         else
             horizontalDirection = 0;
 
         rigid.velocity = new Vector3(horizontalDirection * speed, rigid.velocity.y, 0);
-        
+
         if (!isGround) {
             rigid.velocity -= new Vector3(0,gravity,0);
         }
@@ -97,8 +94,8 @@ public class MoveCharacter : MonoBehaviour {
         // Debug.Log(rigid.velocity);
 
         if (colliderRight.Length<=0 || colliderLeft.Length<=0){
-			
-			rigid.velocity = new Vector3(horizontalDirection*speed*0.5f,rigid.velocity.y,0);
+
+            rigid.velocity = new Vector3(horizontalDirection*speed*0.5f,rigid.velocity.y,0);
             
 		  }
 
@@ -144,7 +141,7 @@ public class MoveCharacter : MonoBehaviour {
         }
 
         // PROBAR
-        if (isGround && Input.GetButtonDown("Jump") && !isJump)
+        if (isGround && (hInput.GetButtonDown("Jump"+control) || hInput.GetAxis("Jump" + control) != 0) && !isJump)
         {
             isJump = true;
             animatorCharacter.SetBool("isJump", true);
@@ -152,7 +149,7 @@ public class MoveCharacter : MonoBehaviour {
             rigid.velocity = Vector3.up * jumpSpeed;
         }
 
-        if (isJump && Input.GetButton("Jump"))
+        if (isJump && (hInput.GetButton("Jump"+control) || hInput.GetAxis("Jump" + control) != 0))
         {
             if (jumpTimeCounter > 0)
             {
@@ -164,18 +161,19 @@ public class MoveCharacter : MonoBehaviour {
             }
         }
 
-        if (isJump && Input.GetButtonUp("Jump"))
+        if (isJump && (hInput.GetButtonUp("Jump"+control) || hInput.GetAxis("Jump" + control) == 0))
         {
             isJump = false;
         }
 
-            if (horizontalDirection<0){
+            // menor que -0.15f para evitar la sensibilidad de los Axis del mando (y que se gire el personaje accidentalmente)
+            if (horizontalDirection < -0.15f){
 			bulletSource.localPosition = new Vector3(-3f,0,0);
 			bulletSource.localRotation = Quaternion.Euler(new Vector3(0,-180,0));
 			spriteCharacter.flipX = true;
-
-
-		} else if(horizontalDirection>0) {
+        }
+        // mayor que 0.15f para evitar la sensibilidad de los Axis del mando (y que se gire el personaje accidentalmente)
+        else if (horizontalDirection > 0.15f) {
 			bulletSource.localPosition = new Vector3(3f,0,0);
 			bulletSource.localRotation = Quaternion.identity;
 			spriteCharacter.flipX = false;

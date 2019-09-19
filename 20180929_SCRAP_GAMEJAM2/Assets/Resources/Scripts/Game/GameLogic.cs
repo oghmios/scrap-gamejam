@@ -9,9 +9,6 @@ public class GameLogic : MonoBehaviour {
     // GAME
 	public enum GameStates {START, GAME, PAUSE, VICTORY, LOSE }
     [Header("GAME SETTINGS")]
-    public AudioManager audioManger;
-    public AudioSource audioMusic;
-    private bool switchMusic = true;
     public GameStates state;
 	private float temp;
     public int scoreGoal;
@@ -37,11 +34,13 @@ public class GameLogic : MonoBehaviour {
 
     // INTERFACES
     [Header("INTERFACE SETTINGS")]
+    public MenuLogic menuLogic;
+    public Transform interfaceGameplay;
     public Transform interfacePause;
     public Transform interfaceGameOver;
     public Transform interfaceVictory;
-    public Text textAudio;
-	private PlayerLogic player;
+    public AudioManager audioManger;
+    private PlayerLogic player;
     public Image scoreImageMask;
     public Image scoreImage;
     private Color colorBarFill = new Color32(26, 219, 0, 255);
@@ -117,6 +116,7 @@ public class GameLogic : MonoBehaviour {
         interfacePause.gameObject.SetActive(false);
         interfaceGameOver.gameObject.SetActive(false);
         interfaceVictory.gameObject.SetActive(false);
+        interfaceGameplay.gameObject.SetActive(true);
 
         // textScoreGoal.text = "<color=yellow>"+scoreGoal.ToString()+ "</color> GOAL";
         textScore.text =  currentScore.ToString() + "/"+ scoreGoal.ToString();
@@ -134,7 +134,11 @@ public class GameLogic : MonoBehaviour {
 
 	public void setGame(){
         Time.timeScale = 1;
+
+        menuLogic.prevOption = 0;
         interfacePause.gameObject.SetActive(false);
+        interfaceGameplay.gameObject.SetActive(true);
+
         blockGridLogic.SetSleep();
         player.setIdle();
         player.transform.GetComponent<MoveCharacter>().enabled = true;
@@ -146,16 +150,22 @@ public class GameLogic : MonoBehaviour {
     public void setPause()
     {
         Time.timeScale = 0;
+        interfaceGameplay.gameObject.SetActive(false);
         interfacePause.gameObject.SetActive(true);
+        menuLogic.GotoMainMenu();
+
         blockGridLogic.SetNone();
         player.setNone();
         player.transform.GetComponent<MoveCharacter>().enabled = false;
         player.enabled = false;
+
+        
         state = GameStates.PAUSE;
     }
 
     public void setVictory(){
 		 temp = 0.25f;
+        interfaceGameplay.gameObject.SetActive(true);
         interfaceVictory.gameObject.SetActive(true);
         interfaceGameOver.gameObject.SetActive(false);
         audioManger.Play(audioManger.playerLaughtLong, transform.position);
@@ -166,6 +176,7 @@ public class GameLogic : MonoBehaviour {
 
 	public void setLose(){
         interfaceVictory.gameObject.SetActive(false);
+        interfaceGameplay.gameObject.SetActive(true);
         interfaceGameOver.gameObject.SetActive(true);
         blockGridLogic.SetNone();
 
@@ -179,21 +190,6 @@ public class GameLogic : MonoBehaviour {
 
 		state = GameStates.LOSE;
 	}
-
-    public void setSwitchMusicOnOff() {
-        switchMusic = !switchMusic;
-
-        if (switchMusic)
-        {
-            audioMusic.Play();
-            textAudio.text = "AUDIO ON";
-        }
-        else
-        {
-            audioMusic.Stop();
-            textAudio.text = "AUDIO OFF";
-        }
-    }
 
     public void setGoToMainMenu()
     {
@@ -210,7 +206,7 @@ public class GameLogic : MonoBehaviour {
     // BEHAVIOURS
 
     private void StartBehaviour(){
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (hInput.GetButtonDown("Cancel_J1"))
         {
             setPause();
         }
@@ -218,7 +214,7 @@ public class GameLogic : MonoBehaviour {
 
 	private void GameBehaviour()
     {
-		if (Input.GetKeyDown(KeyCode.Escape))
+        if (hInput.GetButtonDown("Cancel_J1"))
         {
             setPause();
         }
@@ -226,7 +222,7 @@ public class GameLogic : MonoBehaviour {
 
     private void PauseBehaviour()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (hInput.GetButtonDown("Cancel_J1"))
         {
             setGame();
         }
@@ -238,10 +234,12 @@ public class GameLogic : MonoBehaviour {
 
 	private void VictoryBehaviour(){
 
-
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (hInput.GetButtonDown("Cancel_J1")) {
+            setGoToMainMenu();
+        }
+        if (hInput.GetButtonDown("Submit_J1"))
         {
-            setPause();
+            setRestartLevel();
         }
         /*temp -= Time.deltaTime;
 
@@ -262,9 +260,13 @@ public class GameLogic : MonoBehaviour {
     } 
 
 	private void LoseBehaviour(){
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (hInput.GetButtonDown("Cancel_J1"))
         {
-            setPause();
+            setGoToMainMenu();
+        }
+        if (hInput.GetButtonDown("Submit_J1"))
+        {
+            setRestartLevel();
         }
 
     }

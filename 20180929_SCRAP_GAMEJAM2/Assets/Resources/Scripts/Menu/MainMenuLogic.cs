@@ -2,8 +2,9 @@
 using System.Collections;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-public class MenuLogic : MonoBehaviour {
+public class MainMenuLogic : MonoBehaviour {
 
 	public Transform panelMainMenu;
 	public Transform panelControls;
@@ -17,15 +18,16 @@ public class MenuLogic : MonoBehaviour {
 	public GameObject buttonTutorial;
 	public GameObject buttonStages;
     public GameObject buttonGraphics;
-	public int prevOption;
+	private int prevOption;
     public Text textAudio;
 
     public AudioSource audioMusic;
 
     // Use this for initialization
     void Start () {
+        Cursor.visible = false;
 
-        if (!PlayerPrefs.HasKey("Audio"))
+        if(!PlayerPrefs.HasKey("Audio"))
             PlayerPrefs.SetInt("Audio", 1);
 
         if (PlayerPrefs.GetInt("Audio") == 1)
@@ -52,9 +54,8 @@ public class MenuLogic : MonoBehaviour {
 
 		panelMainMenu.gameObject.SetActive(true);
 		prevOption = 0;
-		// selectPrevOption();
 
-        selectResumeButton();
+        selectButton(buttonResume);
     }
 
 	public void GoToControls(){
@@ -72,33 +73,35 @@ public class MenuLogic : MonoBehaviour {
             prevOption = 1;
         }
 		panelControls.gameObject.SetActive(true);
-
         prevOption = 2;
-        eventsystem.SetSelectedGameObject(buttonControls);
-		
-	}
+        selectButton(buttonControls);
+
+    }
 
     public void GoToGraphics()
     {
-        panelStage.gameObject.SetActive(false);
-        panelMainMenu.gameObject.SetActive(false);
-        panelTutorial.gameObject.SetActive(false);
-        panelControls.gameObject.SetActive(false);
+        if (panelStage != null)
+            panelStage.gameObject.SetActive(false);
+        if (panelMainMenu != null)
+            panelMainMenu.gameObject.SetActive(false);
+        if (panelTutorial != null)
+            panelTutorial.gameObject.SetActive(false);
+        if (panelControls != null)
+            panelControls.gameObject.SetActive(false);
 
         if (panelGraphics != null)
         panelGraphics.gameObject.SetActive(true);
 
-        eventsystem.SetSelectedGameObject(buttonGraphics);
-        prevOption = 2;
+        prevOption = 1;
+        selectButton(buttonGraphics);
+        
     }
 
 	public void GoToTutorial(){
         if (panelStage != null)
             panelStage.gameObject.SetActive(false);
-
         if (panelMainMenu != null)
             panelMainMenu.gameObject.SetActive(false);
-
         if (panelControls != null)
             panelControls.gameObject.SetActive(false);
 
@@ -106,10 +109,18 @@ public class MenuLogic : MonoBehaviour {
             panelGraphics.gameObject.SetActive(false);
 
 		panelTutorial.gameObject.SetActive(true);
-        prevOption = 1;
-        eventsystem.SetSelectedGameObject(buttonTutorial);
-		
-	}
+        prevOption = 3;
+        selectButton(buttonTutorial);
+
+    }
+
+    public void GoToPlay() {
+        SceneManager.LoadScene("Level 1");
+    }
+
+    public void GoToExit() {
+        Application.Quit();
+    }
 
 	public void GotoMainMenu(){
         if (panelStage != null)
@@ -127,22 +138,7 @@ public class MenuLogic : MonoBehaviour {
         if (panelMainMenu != null)
             panelMainMenu.gameObject.SetActive(true);
 
-        selectPrevButton();
-    }
-
-    public void selectResumeButton() {
-
-        if (buttonResume != null)
-        {
-            StartCoroutine(WaitThen_AllowButtonClicks());
-        }
-    }
-
-    private IEnumerator WaitThen_AllowButtonClicks()
-    {
-        yield return null;
-        eventsystem.SetSelectedGameObject(null);
-        eventsystem.SetSelectedGameObject(buttonResume);
+        selectPrevButton(prevOption);
     }
 
     public void GoToStages(){
@@ -158,6 +154,7 @@ public class MenuLogic : MonoBehaviour {
 
     public void setSwitchMusicOnOff()
     {
+
         if (PlayerPrefs.GetInt("Audio") == 0)
         {
             PlayerPrefs.SetInt("Audio", 1);
@@ -171,31 +168,6 @@ public class MenuLogic : MonoBehaviour {
             textAudio.text = "AUDIO OFF";
         }
     }
-
-    public void selectPrevButton()
-    {
-
-        if (buttonResume != null)
-        {
-            StartCoroutine(WaitThen_AllowPrevButtonClicks(prevOption));
-        }
-    }
-
-    private IEnumerator WaitThen_AllowPrevButtonClicks(int buttonOption)
-    {
-        yield return null;
-        eventsystem.SetSelectedGameObject(null);
-
-        if (prevOption == 0)
-            eventsystem.SetSelectedGameObject(buttonsMainMenu[0].gameObject);
-        else if (prevOption == 1)
-            eventsystem.SetSelectedGameObject(buttonsMainMenu[1].gameObject);
-        else if (prevOption == 2)
-            eventsystem.SetSelectedGameObject(buttonsMainMenu[2].gameObject);
-        else
-            eventsystem.SetSelectedGameObject(buttonsMainMenu[0].gameObject);
-    }
-
     /*
     private void selectPrevOption(){
         if(buttonsMainMenu.Length == 4){
@@ -232,5 +204,47 @@ public class MenuLogic : MonoBehaviour {
 
 		
 	}*/
+
+    public void selectButton(GameObject buttonOption)
+    {
+
+        if (buttonResume != null)
+        {
+            StartCoroutine(WaitThen_AllowButtonClicks(buttonOption));
+        }
+    }
+
+    private IEnumerator WaitThen_AllowButtonClicks(GameObject buttonOption)
+    {
+        yield return null;
+        eventsystem.SetSelectedGameObject(null);
+        eventsystem.SetSelectedGameObject(buttonOption);
+    }
+
+    public void selectPrevButton(int buttonOption)
+    {
+
+        if (buttonResume != null)
+        {
+            StartCoroutine(WaitThen_AllowPrevButtonClicks(buttonOption));
+        }
+    }
+
+    private IEnumerator WaitThen_AllowPrevButtonClicks(int buttonOption)
+    {
+        yield return null;
+        eventsystem.SetSelectedGameObject(null);
+
+        if (prevOption == 0)
+            eventsystem.SetSelectedGameObject(buttonsMainMenu[0].gameObject);
+        else if (prevOption == 1)
+            eventsystem.SetSelectedGameObject(buttonsMainMenu[1].gameObject);
+        else if (prevOption == 2)
+            eventsystem.SetSelectedGameObject(buttonsMainMenu[2].gameObject);
+        else if (prevOption == 3)
+            eventsystem.SetSelectedGameObject(buttonsMainMenu[3].gameObject);
+        else
+            eventsystem.SetSelectedGameObject(buttonsMainMenu[0].gameObject);
+    }
 
 }
