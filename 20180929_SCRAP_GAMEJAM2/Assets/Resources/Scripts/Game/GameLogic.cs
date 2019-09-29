@@ -7,13 +7,14 @@ public class GameLogic : MonoBehaviour {
 
     
     // GAME
-	public enum GameStates {START, GAME, PAUSE, VICTORY, LOSE }
+	public enum GameStates {START, GAME, PAUSE, VICTORY, VICTORY_ULTIMATE, LOSE, RESULTS }
     [Header("GAME SETTINGS")]
     public GameStates state;
 	private float temp;
-    public int scoreGoal;
+    public int scoreGoal, scorePerfect;
     public int currentScore = 0;
-    public Text textScore;
+    public Text textScore, textScoreGoal, textScorePerfect;
+    public RectTransform objectScoreGoal;
 
 
     // BLOCKS
@@ -40,19 +41,37 @@ public class GameLogic : MonoBehaviour {
     public Transform interfaceGameOver;
     public Transform interfaceVictory;
     public AudioManager audioManger;
-    private PlayerLogic player;
+    public PlayerLogic player;
+    public MoveCharacter playerMovement;
+    public FadeScreen fadeScreen;
+    public Text infoText, infoTextPerfect;
     public Image scoreImageMask;
     public Image scoreImage;
-    private Color colorBarFill = new Color32(26, 219, 0, 255);
-    private Color colorBarFull = new Color32(255, 237, 0, 255);
+    public Image imgStarGoal, imgTrophyPerfect;
+    public Image imgBarGoal, imgBarPerfect;
+    // private Color colorBarFill = new Color32(26, 219, 0, 255);
+    private Color colorBarGoal = new Color32(255, 180, 0, 255);
+    private Color colorBarFull = new Color32(255, 230, 0, 255);
+    private float animationTime = 2f, currentNumber, initialNumber, desiredNumber;
+    private bool getScoreGoal, getScorePerfect;
 
+    // INTERFACES
+    [Header("BUZZER TIME")]
+    public float slowMotionTime;
+    public float timeScaleBuzzerTime;
+    public Transform panelBuzzTime;
+    public Text textBuzzerTime;
+    public Image frameBuzzer;
+    private GameObject[] bulletsInTheAir;
 
     // Use this for initialization
     void Start () {
 		Cursor.visible = false;
-        audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+        // audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
         PlayerPrefs.SetString("Level",SceneManager.GetActiveScene().name);
-		player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
+		// player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
+        // playerMovement = GameObject.FindGameObjectWithTag("Player").GetComponent<MoveCharacter>();
+        fadeScreen.startFade(false, 0.5f);
         setStart();
 	}
 	
@@ -77,7 +96,15 @@ public class GameLogic : MonoBehaviour {
 		    VictoryBehaviour();
 			break;
 
-		case GameStates.LOSE:
+        case GameStates.VICTORY_ULTIMATE:
+                VictoryUltimateBehaviour();
+                break;
+
+        case GameStates.RESULTS:
+                ResultsBehaviour();
+                break;
+
+            case GameStates.LOSE:
 			LoseBehaviour();
 			break;
 
@@ -104,35 +131,110 @@ public class GameLogic : MonoBehaviour {
 
         }
 
-        if (Input.GetKeyDown(KeyCode.R)){
-            SceneManager.LoadScene(PlayerPrefs.GetString("Level"));
-		} 
+        // Animation Score Text
+        if (currentNumber != desiredNumber) {
 
-	}
+            if (initialNumber < desiredNumber) {
+                currentNumber += (animationTime * Time.deltaTime) * (desiredNumber - initialNumber);
+
+                if (currentNumber < scorePerfect && !getScorePerfect)
+                {
+                    scoreImageMask.fillAmount = (float)currentNumber / scorePerfect;
+
+                    if (currentNumber > scoreGoal && !getScoreGoal)
+                    {
+                        scoreImage.color = colorBarGoal;
+                        textScoreGoal.color = colorBarFull;
+                        imgStarGoal.color = colorBarFull;
+                        imgBarGoal.color = colorBarFull;
+                        imgStarGoal.GetComponent<Animator>().SetTrigger("isIncreased");
+                        getScoreGoal = true;
+                    }
+                    // else if (!getScoreGoal)
+                    //    scoreImage.color = colorBarFill;
+                }
+                else if(!getScorePerfect)
+                {
+                   scoreImageMask.fillAmount = 1;
+                    textScorePerfect.color = colorBarFull;
+                    // scoreImage.color = colorBarFull;
+                    imgBarPerfect.color = colorBarFull;
+                    imgTrophyPerfect.color = colorBarFull;
+                    imgTrophyPerfect.GetComponent<Animator>().SetTrigger("isIncreased");
+                    getScorePerfect = true;
+                }
+
+                if (currentNumber >= desiredNumber)
+                    currentNumber = desiredNumber;
+            }
+        }
+
+        textScore.text = "Score: "+currentNumber.ToString("00"); // +"/"+ scorePerfect.ToString();
+
+        if (state == GameStates.VICTORY || state == GameStates.VICTORY_ULTIMATE) {
+            AudioSource[] sounds = Object.FindObjectsOfType<AudioSource>();
+
+            for (int i = 0; i < sounds.Length; i++)
+            {
+
+                sounds[i].pitch = timeScaleBuzzerTime*2; // Time.timeScale;
+
+            }
+        }
+
+    }
 
 	// SETS
 	public void setStart(){
         Time.timeScale = 1;
+        
+
+
+        if (scoreGoal > scorePerfect) {
+            scorePerfect = scoreGoal;
+        }
+        getScorePerfect = false;
+        getScoreGoal = false;
+        // textScoreGoal.text = "<color=yellow>"+scoreGoal.ToString()+ "</color> GOAL";
+        textScore.text = "Score: "+currentScore.ToString(); // + "/"+ scorePerfect.ToString();
+        textScoreGoal.text = scoreGoal.ToString();
+        textScorePerfect.text = scorePerfect.ToString();
+        // new Vector3(((scoreGoal/scorePerfect)*140)+objectScoreGoal.position.x
+        objectScoreGoal.localPosition = new Vector3(objectScoreGoal.localPosition.x+ (((float)scoreGoal / (float)scorePerfect) * 140f), objectScoreGoal.localPosition.y, objectScoreGoal.localPosition.z);
+        scoreImageMask.fillAmount = (float)currentScore / scorePerfect;
+        // scoreImage.color = colorBarFill;
+
+        panelBuzzTime.gameObject.SetActive(false);
         interfacePause.gameObject.SetActive(false);
         interfaceGameOver.gameObject.SetActive(false);
         interfaceVictory.gameObject.SetActive(false);
-        interfaceGameplay.gameObject.SetActive(true);
-
-        // textScoreGoal.text = "<color=yellow>"+scoreGoal.ToString()+ "</color> GOAL";
-        textScore.text =  currentScore.ToString() + "/"+ scoreGoal.ToString();
-        scoreImageMask.fillAmount = (float)currentScore / scoreGoal;
-        scoreImage.color = colorBarFill;
+        interfaceGameplay.gameObject.SetActive(false);
 
         // INITIALIZE BLOCKS
         blockGridLogic.setCreateBlocks(numRows, numColumns, numHeavyRows, timeToMoveBlocks);
-
+        blockGridLogic.SetNone();
+        
         // INITIALIZE COMBO
         setComboNone();
-
+        temp = 1;
         state = GameStates.START;
 	}
 
-	public void setGame(){
+    public void setGamePrevStart()
+    {
+        Time.timeScale = 1;
+
+        menuLogic.prevOption = 0;
+        interfacePause.gameObject.SetActive(false);
+        infoText.text = "";
+        interfaceGameplay.gameObject.SetActive(true);
+
+        blockGridLogic.SetMove();
+
+        state = GameStates.GAME;
+    }
+
+    public void setGame(){
         Time.timeScale = 1;
 
         menuLogic.prevOption = 0;
@@ -163,16 +265,76 @@ public class GameLogic : MonoBehaviour {
         state = GameStates.PAUSE;
     }
 
-    public void setVictory(){
-		 temp = 0.25f;
+    public void setVictory() {
+
+        Time.timeScale = timeScaleBuzzerTime;
+        
+        temp = slowMotionTime;
+        // INCREASE THE SPEED OF THE PLAYER
+        playerMovement.speed = playerMovement.speed * 1.5f;
+        //playerMovement.jumpSpeed = playerMovement.jumpSpeed * 1.5f;
+        playerMovement.gravity = playerMovement.gravity * 1.5f;
+        player.tempDig = player.tempDig * 0.5f;
+        player.tempDigDown = player.tempDigDown * 0.5f;
+        player.tempDigToIdle = player.tempDigToIdle * 0.5f;
+        player.animatorCharacter.speed = player.animatorCharacter.speed * 1.5f;
+        // player.throwTime = player.throwTime * 0.5f;
+        // playerMovement.gravity = player.gravityOrig * player.gravityMultiplier;
+
+        audioManger.Play(audioManger.buzzerScore, transform.position);
+        infoText.rectTransform.localPosition = new Vector3(0,175,0);
+        infoText.rectTransform.localScale = new Vector3(1, 1, 0);
+        infoText.color = colorBarGoal;
+        infoText.text = "LEVEL COMPLETE!";
+
+        // SHOW BUZZ TIME
+        panelBuzzTime.gameObject.SetActive(true);
+
+        
+
+        blockGridLogic.SetNone();
+        // player.enabled = false;
+
+        state = GameStates.VICTORY;
+	}
+
+    public void setVictoryUltimate() {
+        Time.timeScale = 1f;
+
+        
+
+        // playerMovement.enabled = false;
+        //player.setNone();
+        temp = 3;
+        
+        
+
+        state = GameStates.VICTORY_ULTIMATE;
+    }
+
+    public void setResults() {
+
+        AudioSource[] sounds = Object.FindObjectsOfType<AudioSource>();
+
+        for (int i = 0; i < sounds.Length; i++)
+        {
+
+            sounds[i].pitch = 1; // Time.timeScale;
+
+        }
+
+        if (currentScore >= scorePerfect)
+        {
+            infoTextPerfect.text = "PERFECT!";
+            audioManger.Play(audioManger.playerLaughtLong, transform.position);
+        }
+
         interfaceGameplay.gameObject.SetActive(true);
         interfaceVictory.gameObject.SetActive(true);
         interfaceGameOver.gameObject.SetActive(false);
-        audioManger.Play(audioManger.playerLaughtLong, transform.position);
-        blockGridLogic.SetNone();
-        player.setNone();
-        state = GameStates.VICTORY;
-	}
+
+        state = GameStates.RESULTS;
+    }
 
 	public void setLose(){
         interfaceVictory.gameObject.SetActive(false);
@@ -204,12 +366,71 @@ public class GameLogic : MonoBehaviour {
     }
 
     // BEHAVIOURS
+    private bool aux0, aux1, aux2, aux3;
 
     private void StartBehaviour(){
-        if (hInput.GetButtonDown("Cancel_J1"))
+       /* if (hInput.GetButtonDown("Cancel_J1"))
         {
             setPause();
+        }*/
+
+        temp -= Time.deltaTime;
+
+        if (!aux0) {
+
+            if (temp < 0)
+            {
+                if (fadeScreen.isFadeOut())
+                {
+                    // sound.PlayClip(1);
+                    // textBehaviour.setActive();
+                    infoText.color = Color.red;
+                    infoText.text = "READY?";
+                    temp = 1;
+                    aux0 = true;
+
+                }
+            }
         }
+        else if (!aux1)
+        {
+            if (temp < 0)
+            {
+                infoText.color = Color.yellow;
+                infoText.text = "GO!";
+                temp = 1f;
+                aux1 = true;
+                
+            }
+            
+        }
+        else if (!aux2)
+        {
+            if (temp < 0)
+            {
+                /*music.Play();
+                infoText.text = "";
+                aux2 = true;
+                framesCounter = 0;
+                timeGame = timeGameIni;
+                timeGameText.text = timeGame.ToString();
+                player1.SetMovement();
+                player2.SetMovement();
+                tower1.SetActive();
+                tower2.SetActive();
+                powerUpManager.setPlay();
+                aux0 = false;
+                aux1 = false;
+                aux2 = false;
+                state = GameState.Game;
+                */
+                
+                setGamePrevStart(); 
+                
+            }
+            // else framesCounter++;
+        }
+        
     }
 
 	private void GameBehaviour()
@@ -232,14 +453,44 @@ public class GameLogic : MonoBehaviour {
 		
 	}
 
-	private void VictoryBehaviour(){
+    private void VictoryBehaviour(){
 
-        if (hInput.GetButtonDown("Cancel_J1")) {
-            setGoToMainMenu();
-        }
-        if (hInput.GetButtonDown("Submit_J1"))
+        temp -= Time.deltaTime;
+
+        textBuzzerTime.text = temp.ToString("00.0");
+
+        if (temp <= 0)
         {
-            setRestartLevel();
+
+            textBuzzerTime.text = "00.0";
+            textBuzzerTime.color = Color.red;
+            frameBuzzer.color = Color.red;
+
+            if (playerMovement.isGround)
+            {
+                player.GetComponent<Rigidbody>().isKinematic = true;
+                player.setIdle();
+                player.setNone();
+            }
+
+            bulletsInTheAir = GameObject.FindGameObjectsWithTag("Bullet");
+
+            if (bulletsInTheAir.Length <= 0 && playerMovement.isGround)
+            {
+                setVictoryUltimate();
+            }
+        }
+        
+    }
+    
+    private void VictoryUltimateBehaviour() {
+
+        temp -= Time.deltaTime;
+
+        if (temp < 0 && comboCount == 0 && lastContainerLogic ==null && currentNumber == desiredNumber)
+        {
+            setResults();
+            
         }
         /*temp -= Time.deltaTime;
 
@@ -257,9 +508,20 @@ public class GameLogic : MonoBehaviour {
 			}
 			
 		}*/
-    } 
+    }
 
-	private void LoseBehaviour(){
+    private void ResultsBehaviour() {
+        if (hInput.GetButtonDown("Cancel_J1"))
+        {
+            setGoToMainMenu();
+        }
+        if (hInput.GetButtonDown("Submit_J1"))
+        {
+            setRestartLevel();
+        }
+    }
+
+    private void LoseBehaviour(){
         if (hInput.GetButtonDown("Cancel_J1"))
         {
             setGoToMainMenu();
@@ -275,6 +537,7 @@ public class GameLogic : MonoBehaviour {
 
          textScore.GetComponent<Animator>().SetTrigger("isIncreased");
 
+        initialNumber = currentScore;
 
         if (blockType == 0)
             currentScore += 25;
@@ -285,18 +548,14 @@ public class GameLogic : MonoBehaviour {
         else if (blockType == 3)
             currentScore += 250;
 
-        if (currentScore < scoreGoal)
-        {
-            scoreImageMask.fillAmount = (float)currentScore / scoreGoal;
-            scoreImage.color = colorBarFill;
-        }
-        else {
-            scoreImageMask.fillAmount = 1;
-            scoreImage.color = colorBarFull;
-        }
+        desiredNumber = currentScore;
 
-        textScore.text = currentScore.ToString() + "/" + scoreGoal.ToString();
-        if (currentScore >= scoreGoal) {
+       
+
+        // textScore.text = currentScore.ToString() + "/" + scorePerfect.ToString();
+
+        if (currentScore >= scoreGoal && (state != GameStates.VICTORY && state != GameStates.VICTORY_ULTIMATE)) {
+            Debug.Log("VICTORY SCORE");
             setVictory();
         }
 
@@ -307,11 +566,16 @@ public class GameLogic : MonoBehaviour {
 
         textScore.GetComponent<Animator>().SetTrigger("isIncreased");
 
+        initialNumber = currentScore;
+
         currentScore += scoreCombo;
 
-        if (currentScore < scoreGoal)
+        desiredNumber = currentScore;
+
+        /*
+        if (currentScore < scorePerfect)
         {
-            scoreImageMask.fillAmount = (float)currentScore / scoreGoal;
+            scoreImageMask.fillAmount = (float)currentScore / scorePerfect;
             scoreImage.color = colorBarFill;
         }
         else
@@ -320,18 +584,21 @@ public class GameLogic : MonoBehaviour {
             scoreImage.color = colorBarFull;
         }
 
-        textScore.text = currentScore.ToString() + "/" + scoreGoal.ToString();
-        if (currentScore >= scoreGoal)
+        textScore.text = currentScore.ToString() + "/" + scorePerfect.ToString();
+        */
+        if (currentScore >= scoreGoal && (state!=GameStates.VICTORY && state != GameStates.VICTORY_ULTIMATE))
         {
+            Debug.Log("VICTORY COMBO");
             setVictory();
+            
         }
 
     }
 
     public void AddPenalty(int blockType)
     {
-
-        blockGridLogic.SetMove();
+        if (state != GameStates.VICTORY && state != GameStates.VICTORY_ULTIMATE && state != GameStates.LOSE)
+            blockGridLogic.SetMove();
 
     }
 
@@ -375,30 +642,34 @@ public class GameLogic : MonoBehaviour {
             setPlayComboFinish(comboCount);
         }
 
-        Debug.Log("COMBO: " + comboCount+" !!");
+        // Debug.Log("COMBO: " + comboCount+" !!");
         comboState = ComboStates.FINISH;
     }
 
     private void setPlayComboFinish(int comboCountAux) {
         if (comboCountAux == 2)
         {
-            AddScoreCombo(comboScore2);
+            
             lastContainerLogic.PlayComboFinish(comboCount, comboScore2);
+            AddScoreCombo(comboScore2);
         }
         else if (comboCountAux == 3)
         {
-            AddScoreCombo(comboScore3);
+            
             lastContainerLogic.PlayComboFinish(comboCount, comboScore3);
+            AddScoreCombo(comboScore3);
         }
         else if (comboCountAux == 4)
         {
-            AddScoreCombo(comboScore4);
+            
             lastContainerLogic.PlayComboFinish(comboCount, comboScore4);
+            AddScoreCombo(comboScore4);
         }
         else if (comboCountAux > 4)
         {
-            AddScoreCombo(comboScoreMax);
+            
             lastContainerLogic.PlayComboFinish(comboCount, comboScoreMax);
+            AddScoreCombo(comboScoreMax);
         }
     }
 

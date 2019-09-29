@@ -126,6 +126,7 @@ public class BlockGridLogic : MonoBehaviour {
     public void SetMove() {
 
         CameraShake.Shake(Vector3.one, 0.5f);
+
         state = BlockGridLogicStates.MOVE;
     }
 

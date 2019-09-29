@@ -87,7 +87,7 @@ public class SourceMovement : MonoBehaviour {
     IEnumerator ThrowGarbage(int modeAux)
     {
         yield return new WaitForSeconds(.005f); // (.225f);
-        Debug.Log("forceExpulsionAux: " + forceExpulsionAux);
+        // Debug.Log("forceExpulsionAux: " + forceExpulsionAux);
        //  GameObject bulletAux = (GameObject)Instantiate(bullet[modeAux].gameObject, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
 
          GameObject bulletAux = NewObjectPoolerScript.current.GetPooledObject(modeAux);
@@ -121,7 +121,7 @@ public class SourceMovement : MonoBehaviour {
 
         bulletAux.SetActive(true);
 
-        Debug.Log("MULTIPLIER: " + multiplyImpulse);
+        // Debug.Log("MULTIPLIER: " + multiplyImpulse);
         bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x, yForce, 0) * multiplyImpulse); // *1000);
 
 

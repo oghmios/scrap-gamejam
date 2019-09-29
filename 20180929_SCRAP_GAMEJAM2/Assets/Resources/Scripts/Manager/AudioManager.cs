@@ -31,6 +31,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip playerThrow;
     public AudioClip playerLaughtShort;
     public AudioClip playerLaughtLong;
+    public AudioClip buzzerScore;
 
     #region Functions
 

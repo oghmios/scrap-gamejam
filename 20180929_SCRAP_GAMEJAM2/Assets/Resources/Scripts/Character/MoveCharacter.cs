@@ -16,7 +16,7 @@ public class MoveCharacter : MonoBehaviour {
 	public Transform bulletSource;
 	public LayerMask groundMask;
 	public LayerMask groundDamageMask;
-	public AudioManager audioManger;
+	// public AudioManager audioManager;
 	public SpriteRenderer spriteCharacter;
 	public Rigidbody rigid;
 	public Vector3 sizeSide;
@@ -31,7 +31,7 @@ public class MoveCharacter : MonoBehaviour {
         horizontalControl = true;
         rigid = GetComponent<Rigidbody>();
         isJump = false;
-		audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+		// audioManager = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
 	}
 
 
@@ -125,7 +125,7 @@ public class MoveCharacter : MonoBehaviour {
             if (Input.GetButtonDown("Jump") && !isJump && rigid.velocity.y == 0)
             {
                 animatorCharacter.SetBool("isJump", true);
-                audioManger.Play(audioManger.jumpPlayer, transform.position);
+                audioManager.Play(audioManager.jumpPlayer, transform.position);
                 isJump = true;
                 rigid.velocity = new Vector3(rigid.velocity.x, 0, 0);
                 rigid.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);

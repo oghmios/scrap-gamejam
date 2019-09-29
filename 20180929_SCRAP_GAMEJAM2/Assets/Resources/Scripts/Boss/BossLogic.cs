@@ -60,8 +60,8 @@ public class BossLogic: MonoBehaviour {
 		isKill = false;
 		player = GameObject.FindGameObjectWithTag("Player").transform;
 		// gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
-		//controller = GetComponent<CharacterController>();
-		//tempSound = 10.5f;
+		// controller = GetComponent<CharacterController>();
+		// tempSound = 10.5f;
 		// audioManger.Play(audioManger.bossIdle,transform.position);
 
 		if(mode == BossStates.IDLE)

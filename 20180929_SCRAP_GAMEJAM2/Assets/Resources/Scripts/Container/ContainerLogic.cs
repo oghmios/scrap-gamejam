@@ -234,7 +234,7 @@ public class ContainerLogic : MonoBehaviour
            textContainerComboFinish.text = "";
     }
 
-        IEnumerator WaitAddScoreAnimation() {
+    IEnumerator WaitAddScoreAnimation() {
         
         
         yield return new WaitForSeconds(0.5f);

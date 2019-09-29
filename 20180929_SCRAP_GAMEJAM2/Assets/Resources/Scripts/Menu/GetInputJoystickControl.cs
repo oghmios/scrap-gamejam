@@ -104,24 +104,6 @@ public class GetInputJoystickControl : MonoBehaviour
                 }
             }
 
-            if (Input.GetAxis("CrosspadX_J1") < -0.5f || Input.GetAxis("CrosspadX_J1") > 0.5f)
-            {
-                hInput.SetKey(inputControl, HardShellStudios.CompleteControl.AxisCode.Axis7, HardShellStudios.CompleteControl.TargetController.Joystick1);
-                textControl.text = "J1 CROSSPAD X";
-                inputAxis = true;
-                setNone();
-                return;
-            }
-
-            if (Input.GetAxis("CrosspadY_J1") < -0.5f || Input.GetAxis("CrosspadY_J1") > 0.5f)
-            {
-                hInput.SetKey(inputControl, HardShellStudios.CompleteControl.AxisCode.Axis8, HardShellStudios.CompleteControl.TargetController.Joystick1);
-                textControl.text = "J1 CROSSPAD Y";
-                inputAxis = true;
-                setNone();
-                return;
-            }
-
             if (Input.GetAxis("TriggerLeft_J1") < -0.5f || Input.GetAxis("TriggerLeft_J1") > 0.5f)
             {
                 hInput.SetKey(inputControl, HardShellStudios.CompleteControl.AxisCode.Axis9, HardShellStudios.CompleteControl.TargetController.Joystick1);
@@ -185,5 +167,23 @@ public class GetInputJoystickControl : MonoBehaviour
                 setNone();
                 return;
             }
+            /*
+        if (Input.GetAxis("CrosspadX_J1") < -0.5f || Input.GetAxis("CrosspadX_J1") > 0.5f)
+        {
+            hInput.SetKey(inputControl, HardShellStudios.CompleteControl.AxisCode.Axis7, HardShellStudios.CompleteControl.TargetController.Joystick1);
+            textControl.text = "J1 CROSSPAD X";
+            inputAxis = true;
+            setNone();
+            return;
+        }
+
+        if (Input.GetAxis("CrosspadY_J1") < -0.5f || Input.GetAxis("CrosspadY_J1") > 0.5f)
+        {
+            hInput.SetKey(inputControl, HardShellStudios.CompleteControl.AxisCode.Axis8, HardShellStudios.CompleteControl.TargetController.Joystick1);
+            textControl.text = "J1 CROSSPAD Y";
+            inputAxis = true;
+            setNone();
+            return;
+        }*/
     }
 }

@@ -5,17 +5,17 @@ using UnityEngine.UI;
 public class PlayerLogic: MonoBehaviour {
 
 
-	public enum PlayerStates {IDLE, DAMAGE, EAT, DIE, DIG, DIG_TO_IDLE, DASHDOWN, DASHDOWN_DIG, THROW_BULLET, NONE}
+	public enum PlayerStates {IDLE, DIE, DIG, DIG_TO_IDLE, DASHDOWN, DASHDOWN_DIG, THROW_BULLET, CANCEL_THROW, NONE}
 	public PlayerStates state;
 
     public string control;
-    private GameLogic gameLogic;
+    public GameLogic gameLogic;
 	public Transform explosionBoss;
 	public float lifeIniPlayer;
 	private float lifePlayer;
 	public Transform explosionPlayer;
 	public Transform explosionPowerUp;
-	public AudioManager audioManger;
+	public AudioManager audioManager;
 	public SourceMovement sourceBullets;
     public MoveCharacter moveCharacter;
 	public Animator animatorCharacter;
@@ -29,9 +29,6 @@ public class PlayerLogic: MonoBehaviour {
 
 	private float temp;
 
-	public float tempHumanityIni;
-	// private float tempHumanity;
-
 	public Queue<int> piecesChar; 
 
 	public float fireRate = 1F;
@@ -42,21 +39,24 @@ public class PlayerLogic: MonoBehaviour {
     private float gravityOrig;
     public float gravityMultiplier = 4;
     public float tempDig = 2;
-    public float temDigDown = 1;
+    public float tempDigDown = 1;
     public float tempDigToIdle = 0.5f;
     public Color colorPrepareThrow, colorPrepareThrowMax;
+    private bool isCanceledThrow;
+    public Transform shovelDie;
 
 
     private void Start(){
 
         gravityOrig = moveCharacter.gravity;
-        audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+        // audioManager = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
 		piecesChar = new Queue<int>();
-		gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
+		// gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         pieceGlow.sprite = null;
         pieceGlow.color = new Color(0, 0, 0, 0);
         spriteCharacter.enabled = true;
         isThrow = false;
+        isCanceledThrow = false;
         setIdle();
 	}
 
@@ -68,12 +68,6 @@ public class PlayerLogic: MonoBehaviour {
         {
             case PlayerStates.IDLE:
                 IdleBehaviour();
-                break;
-            case PlayerStates.DAMAGE:
-                DamageBehaviour();
-                break;
-            case PlayerStates.EAT:
-                EatBehaviour();
                 break;
             case PlayerStates.DIG:
                 DigBehaviour();
@@ -90,6 +84,9 @@ public class PlayerLogic: MonoBehaviour {
             case PlayerStates.THROW_BULLET:
                 ThrowBulletBehaviour();
                 break;
+            case PlayerStates.CANCEL_THROW:
+                CancelThrowBehaviour();
+                break;
             case PlayerStates.DIE:
                 DieBehaviour();
                 break;
@@ -98,88 +95,109 @@ public class PlayerLogic: MonoBehaviour {
                 break;
         }
 
-
-        // BOTON PARA TRANSFORMAR
-        if ((hInput.GetButton("Dig"+control) || hInput.GetAxis("Dig" + control) > 0 || hInput.GetAxis("Dig" + control) < 0) && moveCharacter.isGround && Time.time > nextFire &&
-            state == PlayerStates.IDLE && ( !hInput.GetButton("Throw"+control) || hInput.GetAxis("Throw" + control) == 0))
+        if (state != PlayerStates.DIE)
         {
+            // BOTON PARA TRANSFORMAR
+            if ((hInput.GetButton("Dig" + control) || hInput.GetAxis("Dig" + control) > 0 || hInput.GetAxis("Dig" + control) < 0) && moveCharacter.isGround && Time.time > nextFire &&
+                state == PlayerStates.IDLE && (!hInput.GetButton("Throw" + control) || hInput.GetAxis("Throw" + control) == 0))
+            {
 
-            nextFire = Time.time + fireRate;
-            
-            setDig();
-        }
-        else if ((hInput.GetButton("Dig"+control) || hInput.GetAxis("Dig" + control) > 0 || hInput.GetAxis("Dig" + control) < 0) && !moveCharacter.isGround && Time.time > nextFire
-            && state == PlayerStates.IDLE && (!hInput.GetButton("Throw"+control) || hInput.GetAxis("Throw" + control) == 0))
-        {
-            
-            nextFire = Time.time + fireRate;
+                nextFire = Time.time + fireRate;
+
+                setDig();
+            }
+            else if ((hInput.GetButton("Dig" + control) || hInput.GetAxis("Dig" + control) > 0 || hInput.GetAxis("Dig" + control) < 0) && !moveCharacter.isGround && Time.time > nextFire
+                && state == PlayerStates.IDLE && (!hInput.GetButton("Throw" + control) || hInput.GetAxis("Throw" + control) == 0))
+            {
+
+                nextFire = Time.time + fireRate;
 
                 setDashDown();
-        }/*
+            }/*
         else if(Input.GetButton("Fire1") && (state != PlayerStates.DASHDOWN || state != PlayerStates.DASHDOWN_DIG || state != PlayerStates.DIG_TO_IDLE))
         {
             // animatorCharacter.SetBool("isDig", false);
-            Debug.Log("3");
             setIdle();
         }*/
 
-        if ((hInput.GetButtonDown("Throw"+control) || hInput.GetAxis("Throw" + control) < 0 || hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count > 0)
+            if ((hInput.GetButtonDown("Throw" + control) || hInput.GetAxis("Throw" + control) < 0 ||
+                hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count > 0 && !isCanceledThrow)
             {
 
-            isThrow = true;
-            // rigid.velocity = Vector3.up * jumpSpeed;
-            animatorCharacter.SetTrigger("IsPrepareThrow");
-            spriteCharacter.color = colorPrepareThrow;
-            throwTimeCounter = throwTime;
-        }
-
-        if ((hInput.GetButtonDown("Throw"+control) || hInput.GetAxis("Throw" + control) < 0 || hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count <= 0)
-        {
-            colorIntenvory.setAnimation();
-        }
-
-        if (isThrow && (hInput.GetButton("Throw"+control) || hInput.GetAxis("Throw" + control) < 0 || hInput.GetAxis("Throw" + control) > 0))
-        {
-            
-            if (throwTimeCounter > 0)
-            {
-
+                isThrow = true;
                 // rigid.velocity = Vector3.up * jumpSpeed;
-                //setThrowBullet(throwTime - throwTimeCounter);
-                //animatorCharacter.SetTrigger("IsPrepareThrow");
-                throwTimeCounter -= Time.deltaTime;
-                spriteCharacter.color = colorPrepareThrow;
-            }
-            else
-            {
-                
-                throwTimeCounter = 0;
-                // animatorCharacter.SetTrigger("IsPrepareThrow");
-                spriteCharacter.color = colorPrepareThrowMax;
-                // isThrow = false;
+
+                if (state != PlayerStates.THROW_BULLET)
+                {
+                    animatorCharacter.SetTrigger("IsPrepareThrow");
+                    spriteCharacter.color = colorPrepareThrow;
+                    throwTimeCounter = throwTime;
+                }
             }
 
-            // Si se mantiene el lanzamiento y se da la tecla cavar, 
-            // se cancela  el lanzamiento
-            if (hInput.GetButton("Dig"+control) || hInput.GetAxis("Dig" + control) != 0)
+
+            if ((hInput.GetButtonDown("Throw" + control) || hInput.GetAxis("Throw" + control) < 0 ||
+                hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count <= 0 && !isCanceledThrow)
             {
-                isThrow = false;
-                animatorCharacter.SetTrigger("IsThrow");
+                colorIntenvory.setAnimation();
+            }
+
+            if (isThrow && (hInput.GetButton("Throw" + control) || hInput.GetAxis("Throw" + control) < 0 ||
+                hInput.GetAxis("Throw" + control) > 0 && !isCanceledThrow))
+            {
+
+                if (throwTimeCounter > 0)
+                {
+
+                    // rigid.velocity = Vector3.up * jumpSpeed;
+                    //setThrowBullet(throwTime - throwTimeCounter);
+                    //animatorCharacter.SetTrigger("IsPrepareThrow");
+
+                    // CUANDO ESTÁ EN BUZZER TIME NO DEBE LANZAR TAN LENTO
+                    if (gameLogic.state == GameLogic.GameStates.VICTORY || gameLogic.state == GameLogic.GameStates.VICTORY_ULTIMATE)
+                    {
+                        throwTimeCounter -= Time.deltaTime * 1.25f;
+                    }
+                    else
+                    {
+                        throwTimeCounter -= Time.deltaTime;
+                    }
+                    spriteCharacter.color = colorPrepareThrow;
+                }
+                else
+                {
+                    throwTimeCounter = 0;
+                    // animatorCharacter.SetTrigger("IsPrepareThrow");
+                    spriteCharacter.color = colorPrepareThrowMax;
+                    // isThrow = false;
+                }
+
+                // Si se mantiene el lanzamiento y se da la tecla cavar, 
+                // se cancela  el lanzamiento
+                if (hInput.GetButton("Dig" + control) || hInput.GetAxis("Dig" + control) != 0)
+                {
+
+                    isThrow = false;
+                    isCanceledThrow = true;
+                    animatorCharacter.SetTrigger("isForcedToIdle");
+                    spriteCharacter.color = Color.white;
+                    setCancelThrow();
+                    //setIdle();
+                }
+            }
+
+            if (isThrow && (hInput.GetButtonUp("Throw" + control) || hInput.GetAxis("Throw" + control) == 0) && !isCanceledThrow)
+            {
+
+                //animatorCharacter.SetBool("IsPrepareThrow", false);            
+                setThrowBullet(throwTime - throwTimeCounter);
+
                 spriteCharacter.color = Color.white;
-                setIdle();
             }
-        }
 
-        if (isThrow && (hInput.GetButtonUp("Throw"+control) || hInput.GetAxis("Throw" + control) == 0))
-        {
-            //animatorCharacter.SetBool("IsPrepareThrow", false);
-            setThrowBullet(throwTime - throwTimeCounter);
-            isThrow = false;
-            spriteCharacter.color = Color.white;
         }
 
     }
-	// END TRANSMUTATE
 
 	public void setIdle(){
         moveCharacter.horizontalControl = true;
@@ -189,62 +207,67 @@ public class PlayerLogic: MonoBehaviour {
 		state = PlayerStates.IDLE;
 	}
 
-	public void setEat(){
-		temp = 0.5f;
-
-			animatorCharacter.SetBool("isEat", true);
-
-		state = PlayerStates.EAT;
-	}
+    public void setCancelThrow() {
+        state = PlayerStates.CANCEL_THROW;
+    }
 
     public void setDig()
     {
-        temp = tempDig;
-        if (piecesChar.Count < 4 && moveCharacter.isGround)
+        if (gameLogic.state != GameLogic.GameStates.START)
         {
-            audioManger.Play(audioManger.Shoot, transform.position);
-            animatorCharacter.SetTrigger("IsDig");
-            CameraShake.Shake(Vector3.one*0.25f, 0.25f);
-            colliderDig.enabled = true;
-            state = PlayerStates.DIG;
-        }
-        else if (piecesChar.Count >= 4 && moveCharacter.isGround )
-        {
-            colorIntenvory.setAnimation();
-            setIdle();
+            temp = tempDig;
+            if (piecesChar.Count < 4 && moveCharacter.isGround)
+            {
+                CameraShake.Shake(Vector3.one * 0.5f, 0.25f);
+                audioManager.Play(audioManager.Shoot, transform.position);
+                animatorCharacter.SetTrigger("IsDig");
+                CameraShake.Shake(Vector3.one * 0.25f, 0.25f);
+                colliderDig.enabled = true;
+                state = PlayerStates.DIG;
+            }
+            else if (piecesChar.Count >= 4 && moveCharacter.isGround)
+            {
+                colorIntenvory.setAnimation();
+                setIdle();
+            }
         }
     }
 
     public void setDashDown()
     {
-        animatorCharacter.SetBool("IsDigDash", true);
-        moveCharacter.horizontalControl = false;
-        moveCharacter.gravity = gravityOrig * gravityMultiplier;
-        
+        if (gameLogic.state != GameLogic.GameStates.START)
+        {
+            animatorCharacter.SetBool("IsDigDash", true);
+            moveCharacter.horizontalControl = false;
+            moveCharacter.gravity = gravityOrig * gravityMultiplier;
 
-        state = PlayerStates.DASHDOWN;
 
+            state = PlayerStates.DASHDOWN;
+        }
     }
 
     public void setDashDownDig()
     {
-        moveCharacter.horizontalControl = false;
-        temp = temDigDown;
-        moveCharacter.gravity = gravityOrig;
-        
-        if (piecesChar.Count < 4 && moveCharacter.isGround)
+        if (gameLogic.state != GameLogic.GameStates.START)
         {
-            audioManger.Play(audioManger.Shoot, transform.position);
-            animatorCharacter.SetBool("IsDigDash", true);
-            CameraShake.Shake(Vector3.one * 0.5f, 0.5f);
-            colliderDig.enabled = true;
-            state = PlayerStates.DASHDOWN_DIG;
-        }
-        else if (piecesChar.Count >= 4 && moveCharacter.isGround)
-        {
-            animatorCharacter.SetBool("IsDigDash", false);
-            colorIntenvory.setAnimation();
-            setIdle();
+            moveCharacter.horizontalControl = false;
+            temp = tempDigDown;
+            moveCharacter.gravity = gravityOrig;
+
+            if (piecesChar.Count < 4 && moveCharacter.isGround)
+            {
+                audioManager.Play(audioManager.Shoot, transform.position);
+                animatorCharacter.SetBool("IsDigDash", true);
+                CameraShake.Shake(Vector3.one * 0.5f, 0.35f);
+                colliderDig.enabled = true;
+                state = PlayerStates.DASHDOWN_DIG;
+            }
+            else if (piecesChar.Count >= 4 && moveCharacter.isGround)
+            {
+                animatorCharacter.SetBool("IsDigDash", false);
+                colorIntenvory.setAnimation();
+                setIdle();
+            }
         }
     }
 
@@ -258,61 +281,27 @@ public class PlayerLogic: MonoBehaviour {
 
     }
 
-    public void setDamage(){
-
-		if(state != PlayerStates.DIE ){
-			lifePlayer--;
-			audioManger.Play (audioManger.damagePlayer,transform.position);
-			
-			transform.GetComponentInChildren<SpriteRenderer>().color = Color.red;
-			temp = 0.25f;
-
-			if(lifePlayer<=0){
-				setDie();
-			} else {
-
-			state = PlayerStates.DAMAGE;
-			}
-		}
-	}
-	
-	public void setDieTransmutate(){
-		transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
-		GetComponent<AudioSource>().pitch = 1;
-
-		animatorCharacter.GetComponent<SpriteRenderer>().flipX = !animatorCharacter.GetComponent<SpriteRenderer>().flipX;
-
-		audioManger.Play(audioManger.shotBulletBoss,transform.position);
-		GameObject explosionBossAux = (GameObject) Instantiate(explosionBoss.gameObject,transform.position, Quaternion.identity);
-		Destroy(explosionBossAux,0.5f);
-
-		temp = 3f;
-		GetComponent<MoveCharacter>().enabled = false;
-
-		state = PlayerStates.DIE;
-	}
-
 	public void setDie(){
-		//transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
-		
-			//animatorCharacter.SetBool("isDie", true);
-			//animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.5f, animatorCharacter.transform.localPosition.z); 
-		
-		
-		audioManger.Play (audioManger.bossExplosion,transform.position);
-		GameObject explosion = (GameObject)Instantiate(explosionPlayer.gameObject,transform.position,Quaternion.identity);
-		Destroy (explosion,2);
-		temp = 3f;
-		GetComponent<MoveCharacter>().enabled = false;
-        spriteCharacter.enabled = false;
-        // transform.GetChild(0).gameObject.SetActive(false);
-        // transform.GetChild(2).gameObject.SetActive(false);
+        //transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 
-            /* BoxCollider[] col = GetComponents<BoxCollider>();
-            foreach(BoxCollider cola in col){
-                cola.enabled = false;
-            }*/
-            state = PlayerStates.DIE;
+        //animatorCharacter.SetBool("isDie", true);
+        //animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.5f, animatorCharacter.transform.localPosition.z); 
+
+        animatorCharacter.SetTrigger("isDied");
+        shovelDie.gameObject.SetActive(true);
+        shovelDie.transform.parent = null;
+        GetComponent<MoveCharacter>().enabled = false;
+        GetComponent<Rigidbody>().mass = 10;
+        GetComponent<Rigidbody>().angularDrag = 100;
+        GetComponent<Rigidbody>().drag = 1;
+        GetComponent<CapsuleCollider>().radius = 0;
+        GetComponent<CapsuleCollider>().height = 0;
+        audioManager.Play (audioManager.bossExplosion,transform.position);
+		GameObject explosion = (GameObject)Instantiate(explosionPlayer.gameObject,transform.position,Quaternion.identity);
+		//Destroy (explosion,2);
+		temp = 3f;
+		
+        state = PlayerStates.DIE;
 	}
 
     public void setThrowBullet(float forceExpulsion) {
@@ -320,8 +309,8 @@ public class PlayerLogic: MonoBehaviour {
         
         if (piecesChar.Count > 0 && sourceBullets.state == SourceMovement.PlayerAttackStates.NONE)
         {
-            audioManger.Play(audioManger.playerThrow, transform.position);
-            temp = 2;
+            audioManager.Play(audioManager.playerThrow, transform.position);
+            // temp = 2;
             // SI SUPERA LAS PIEZAS A ACUMULAR SE QUITA LA ULTIMA
             int pieceMode = piecesChar.Dequeue();
 
@@ -427,9 +416,12 @@ public class PlayerLogic: MonoBehaviour {
             piece1.GetComponent<Animator>().SetTrigger("isCatched");
             sourceBullets.setRange(pieceMode, forceExpulsion);
             animatorCharacter.SetTrigger("IsThrow");
+            temp = 0.1f;
             state = PlayerStates.THROW_BULLET;
         }
         else {
+            animatorCharacter.SetTrigger("isForcedToIdle");
+            isThrow = false;
             setIdle();
         }
     }
@@ -443,6 +435,15 @@ public class PlayerLogic: MonoBehaviour {
     }
 
     // BEHAVIOURS
+    private void CancelThrowBehaviour() {
+        
+
+        if (!hInput.GetButton("Throw" + control)) {
+            isCanceledThrow = false;
+            setIdle();
+        }
+    }
+
     private void DamageBehaviour(){
 
 		temp -= Time.deltaTime;
@@ -453,15 +454,6 @@ public class PlayerLogic: MonoBehaviour {
 
 	private void IdleBehaviour(){
 
-	}
-
-	private void EatBehaviour(){
-		temp -= Time.deltaTime;
-		
-		
-		if(temp<0){
-			setIdle();
-		}
 	}
 
     private void DigBehaviour()
@@ -501,7 +493,7 @@ public class PlayerLogic: MonoBehaviour {
         temp -= Time.deltaTime;
 
 
-        if (temp < 0)
+        if (temp <= 0)
         {
             setIdle();
         }
@@ -512,15 +504,23 @@ public class PlayerLogic: MonoBehaviour {
 
 
 		if(temp<0){
-			// Destroy(this.gameObject);
+            // Destroy(this.gameObject);
             if (gameLogic.state != GameLogic.GameStates.LOSE)
-			gameLogic.setLose();
+            {
+                gameLogic.setLose();
+                this.enabled = false;
+            }
 		}
 	}
 
     private void ThrowBulletBehaviour()
     {
-        setIdle();
+        temp -= Time.deltaTime;
+        if (temp < 0)
+        {
+            isThrow = false;
+            setIdle();
+        }
     }
 
     private void NoneBehaviour()
@@ -528,10 +528,10 @@ public class PlayerLogic: MonoBehaviour {
 
     }
 
-
+    /*
     void OnTriggerEnter(Collider other){
 
-        /*
+       
 		if(other.tag == "EnemyDamage"){
 			setDamage();
 		}
@@ -540,9 +540,9 @@ public class PlayerLogic: MonoBehaviour {
 			GameObject explosion = (GameObject)Instantiate(explosionPowerUp.gameObject,transform.position,Quaternion.identity);
 			Destroy (explosion,2);
 			
-		}*/
+		}
 
-	}
+	}*/
 
 	public void addPiece(int idPiece){
 
@@ -647,7 +647,6 @@ public class PlayerLogic: MonoBehaviour {
 		}
 
 
-        // Debug.Log (piecesChar.Count+" "+piecesChar.ToString());
 	}
 
 	private void Transmutate(){
