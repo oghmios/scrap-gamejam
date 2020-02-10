@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 
 //[RequireComponent(typeof(GameManager))]
-//[RequireComponent(typeof(LevelManager))]
+[RequireComponent(typeof(LevelManager))]
 [RequireComponent(typeof(ScreenManager))]
 [RequireComponent(typeof(AudioManager))]
 //[RequireComponent(typeof(GameDataManager))]
@@ -49,11 +49,11 @@ public class CoreManager : MonoBehaviour
     }
 
     // Level
-    /*private static LevelManager levelManager;
+    private static LevelManager levelManager;
     public static LevelManager Level
     {
         get { return levelManager; }
-    }*/
+    }
 
     // Gamedata
    	/* private static GameDataManager gamedataManager;
@@ -82,7 +82,7 @@ public class CoreManager : MonoBehaviour
         // Find the references
         // We must attach on the GameObject 
         // gameManager = GetComponent<GameManager>();
-        // levelManager = GetComponent<LevelManager>();
+        levelManager = GetComponent<LevelManager>();
         screenManager = GetComponent<ScreenManager>();
         audioManager = GetComponent<AudioManager>();
        // gamedataManager = GetComponent<GameDataManager>();
@@ -113,7 +113,21 @@ public class CoreManager : MonoBehaviour
 
 	void Start() {
 		PlayerPrefs.SetInt("Sound",1);
+        
+        // TO DO: COMENTADO PARA APLICARLO DIRECTAMENTE EN EL NIVEL
+        StartCoroutine(LoadAsyncOperation());
 
-        SceneManager.LoadScene("Menu");
 	}
+
+    IEnumerator LoadAsyncOperation()
+    {
+
+        AsyncOperation gameLevel = SceneManager.LoadSceneAsync("Menu");
+
+        while (gameLevel.progress < 1)
+        {
+
+            yield return new WaitForEndOfFrame();
+        }
+    }
 }

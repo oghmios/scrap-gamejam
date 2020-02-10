@@ -122,6 +122,7 @@ public class GetInputJoystickControl : MonoBehaviour
                 return;
             }
 
+            /*
             if (Input.GetAxis("Horizontal_J1") < -0.5f || Input.GetAxis("Horizontal_J1") > 0.5f)
             {
 
@@ -167,7 +168,11 @@ public class GetInputJoystickControl : MonoBehaviour
                 setNone();
                 return;
             }
+            
+            */
+            
             /*
+         * DEPRECATED
         if (Input.GetAxis("CrosspadX_J1") < -0.5f || Input.GetAxis("CrosspadX_J1") > 0.5f)
         {
             hInput.SetKey(inputControl, HardShellStudios.CompleteControl.AxisCode.Axis7, HardShellStudios.CompleteControl.TargetController.Joystick1);

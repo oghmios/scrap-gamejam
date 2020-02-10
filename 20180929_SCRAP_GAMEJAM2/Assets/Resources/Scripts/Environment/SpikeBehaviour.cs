@@ -17,12 +17,12 @@ public class SpikeBehaviour : MonoBehaviour {
 		if(other.tag == "Player" && playerLogic.state!= PlayerLogic.PlayerStates.DIE)
         {
             // gameLogic.setLose();
-            playerLogic.setDie();
+            playerLogic.setDie(0);
         }
 
         if (other.tag == "Block")
         {
-            gameLogic.setLose();
+            gameLogic.setLose(1);
 
         }
 

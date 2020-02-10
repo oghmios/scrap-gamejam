@@ -10,16 +10,28 @@ public class SourceMovement : MonoBehaviour {
 	public float tempRangeIni;
 	public Transform[] bullet;
 	public Animator animatorCharacter;
-	public AudioManager audioManger;
 	public PlayerLogic playerLogic;
     private float forceExpulsionAux;
     private float multiplyImpulse;
     public float minImpulse;
+    // public float mediumImpulse;
     public float maxImpulse;
+    public float minLimitImpulse, maxLimitImpulse; 
     public float yForce = 5f;
+    public float oneShotImpulse;
 
     void Start(){
-        
+
+        if (PlayerPrefs.GetFloat("ThrowSensitivity") == 0)
+        {
+            PlayerPrefs.SetFloat("ThrowSensitivity", 1f);
+            maxLimitImpulse = 1;
+        }
+        else
+        {
+            maxLimitImpulse = PlayerPrefs.GetFloat("ThrowSensitivity");
+        }
+
         forceExpulsionAux = 0;
         temp = 0;
         setNone();
@@ -50,7 +62,7 @@ public class SourceMovement : MonoBehaviour {
          StartCoroutine("ThrowGarbage", modeBullet);
         // bulletAux.GetComponent<Rigidbody>().velocity = bulletAux.transform.right * 15f;
 
-        audioManger.Play(audioManger.Shoot, transform.position);
+        CoreManager.Audio.Play(CoreManager.Audio.playerDigImpossible, transform.position);
 
         state = PlayerAttackStates.RANGE;
 		
@@ -96,21 +108,21 @@ public class SourceMovement : MonoBehaviour {
 
         // OLD (MORE HORIZONTAL) new Vector3(transform.localPosition.x, 5f, 0) 
         // forceExpulsionAux forceExpulsionAux <= 0.1f --> 700 --- forceExpulsionAux >= 0.4f --> 1100
-
-        if (forceExpulsionAux <= 0.1f)
+        
+        if (forceExpulsionAux <= minLimitImpulse)
         {
             multiplyImpulse = minImpulse;
         }
-        else if (forceExpulsionAux >= 0.4f)
+        else if (forceExpulsionAux >= maxLimitImpulse)
         {
             multiplyImpulse = maxImpulse;
         }
-        else if (forceExpulsionAux > 0.1f && forceExpulsionAux < 0.4f)
+        else if (forceExpulsionAux > minLimitImpulse && forceExpulsionAux < maxLimitImpulse)
         {
-            multiplyImpulse = (((forceExpulsionAux - 0.1f) * (maxImpulse - minImpulse)) / 0.3f) + minImpulse;
+                multiplyImpulse = (((forceExpulsionAux - minLimitImpulse) * (maxImpulse - minImpulse)) / (maxLimitImpulse - minLimitImpulse)) + minImpulse;
         }
 
-        
+        playerLogic.animatorCharacter.SetTrigger("IsThrow");
         // RESET THE RIGIDBODY PROPERTIES
         bulletAux.GetComponent<Rigidbody>().velocity = Vector3.zero;
         bulletAux.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
@@ -121,11 +133,14 @@ public class SourceMovement : MonoBehaviour {
 
         bulletAux.SetActive(true);
 
-        // Debug.Log("MULTIPLIER: " + multiplyImpulse);
-        bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x, yForce, 0) * multiplyImpulse); // *1000);
+        if (PlayerPrefs.GetInt("OneShot") == 1)
+            bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x * 1.25f, yForce, 0) * oneShotImpulse); // *1000);
+        else
+            bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x * 1.25f, yForce, 0) * multiplyImpulse); // *1000);
+
+        // Debug.Log("MULTIPLIER: " + multiplyImpulse + " X:" + transform.localPosition.x * 1.25f + " Y:" + yForce+" LAUNCHE VECTOR: " +(new Vector3(transform.localPosition.x*1.25f, yForce, 0) * multiplyImpulse).ToString());
 
 
-        
     }
 
     private void NoneBehaviour(){

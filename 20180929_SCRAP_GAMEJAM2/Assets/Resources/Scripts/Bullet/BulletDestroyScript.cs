@@ -10,6 +10,7 @@ public class BulletDestroyScript : MonoBehaviour {
 
     public void DestroyBall()
     {
+        GetComponent<GranadeLogic>().isTouchedBird = false;
         gameObject.SetActive(false);
     }
 

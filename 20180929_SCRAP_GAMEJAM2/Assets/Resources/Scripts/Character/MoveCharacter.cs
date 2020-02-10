@@ -16,22 +16,23 @@ public class MoveCharacter : MonoBehaviour {
 	public Transform bulletSource;
 	public LayerMask groundMask;
 	public LayerMask groundDamageMask;
-	// public AudioManager audioManager;
 	public SpriteRenderer spriteCharacter;
 	public Rigidbody rigid;
 	public Vector3 sizeSide;
 	public Vector3 sizeGround;
     public Animator animatorCharacter;
-    private float horizontalDirection;
+    public float horizontalDirection;
     public float jumpTime = 0.5f; 
     private float jumpTimeCounter;
     public bool horizontalControl;
+    private Transform myTransform;
 
     private void Start(){
+        myTransform = this.transform;
         horizontalControl = true;
         rigid = GetComponent<Rigidbody>();
         isJump = false;
-		// audioManager = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+		// CoreManager.Audio = GameObject.FindGameObjectWithTag("CoreManager.Audio").GetComponent<CoreManager.Audio>();
 	}
 
 
@@ -46,7 +47,12 @@ public class MoveCharacter : MonoBehaviour {
     void FixedUpdate()
     {
         if (horizontalControl)
+        {
             horizontalDirection = hInput.GetAxis("Horizontal" + control);
+
+            if (horizontalDirection > -0.3f && horizontalDirection < 0.3f)
+                horizontalDirection = 0;
+        }
         else
             horizontalDirection = 0;
 
@@ -105,7 +111,11 @@ public class MoveCharacter : MonoBehaviour {
         
 
         if (collidersHits.Length>0){
-			isGround = true;
+
+            if(!isGround)
+                CoreManager.Audio.Play(CoreManager.Audio.playerGrounded, myTransform.position, Random.Range(0.8f, 1.2f));
+
+            isGround = true;
             
         } else {
 			isGround = false;
@@ -116,8 +126,8 @@ public class MoveCharacter : MonoBehaviour {
 
 		
 		if(collidersDamageHits.Length>0){
-			
-			transform.GetComponent<PlayerLogic>().setDie();
+
+            myTransform.GetComponent<PlayerLogic>().setDie(0);
 		}
         /*
 		if(isGround){
@@ -125,7 +135,7 @@ public class MoveCharacter : MonoBehaviour {
             if (Input.GetButtonDown("Jump") && !isJump && rigid.velocity.y == 0)
             {
                 animatorCharacter.SetBool("isJump", true);
-                audioManager.Play(audioManager.jumpPlayer, transform.position);
+                CoreManager.Audio.Play(CoreManager.Audio.jumpPlayer, myTransform.position);
                 isJump = true;
                 rigid.velocity = new Vector3(rigid.velocity.x, 0, 0);
                 rigid.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
@@ -145,6 +155,7 @@ public class MoveCharacter : MonoBehaviour {
         {
             isJump = true;
             animatorCharacter.SetBool("isJump", true);
+            CoreManager.Audio.Play(CoreManager.Audio.playerJump, myTransform.position, Random.Range(0.8f, 1.2f));
             jumpTimeCounter = jumpTime;
             rigid.velocity = Vector3.up * jumpSpeed;
         }
@@ -167,14 +178,14 @@ public class MoveCharacter : MonoBehaviour {
         }
 
             // menor que -0.15f para evitar la sensibilidad de los Axis del mando (y que se gire el personaje accidentalmente)
-            if (horizontalDirection < -0.15f){
-			bulletSource.localPosition = new Vector3(-3f,0,0);
-			bulletSource.localRotation = Quaternion.Euler(new Vector3(0,-180,0));
+            if (horizontalDirection < -0.3f){
+			bulletSource.localPosition = new Vector3(-2,0.8f,0); // (-3f,0,0);
+            bulletSource.localRotation = Quaternion.Euler(new Vector3(0,-180,0));
 			spriteCharacter.flipX = true;
         }
         // mayor que 0.15f para evitar la sensibilidad de los Axis del mando (y que se gire el personaje accidentalmente)
-        else if (horizontalDirection > 0.15f) {
-			bulletSource.localPosition = new Vector3(3f,0,0);
+        else if (horizontalDirection > 0.3f) {
+			bulletSource.localPosition = new Vector3(2,0.8f,0);
 			bulletSource.localRotation = Quaternion.identity;
 			spriteCharacter.flipX = false;
 

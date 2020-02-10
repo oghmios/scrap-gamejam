@@ -1,16 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BlockLogic : MonoBehaviour {
 
-    public enum BlockLogicState { STEP, NONE };
-    public BlockLogicState state;
+    // public enum BlockLogicState { STEP, NONE };
+    // public BlockLogicState state;
 
-    public int endurance;
-    public int score;
+   //  public int endurance;
+   //  public int score;
     public int type;
-
+    /*
     void Update()
     {
         switch (state)
@@ -48,6 +46,6 @@ public class BlockLogic : MonoBehaviour {
     {
         // Comprobar si el pj se quita de este bloque
         SetNone();
-    }
+    }*/
 
 }

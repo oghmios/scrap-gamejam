@@ -27,15 +27,24 @@ public class MainMenuLogic : MonoBehaviour {
     void Start () {
         Cursor.visible = false;
 
-        if(!PlayerPrefs.HasKey("Audio"))
-            PlayerPrefs.SetInt("Audio", 1);
+        if (!PlayerPrefs.HasKey("Sound"))
+            PlayerPrefs.SetInt("Sound", 1);
 
-        if (PlayerPrefs.GetInt("Audio") == 1)
+        if (!PlayerPrefs.HasKey("GuideThrow"))
+            PlayerPrefs.SetInt("GuideThrow", 1);
+
+        if (!PlayerPrefs.HasKey("ThrowSensitivity"))
+            PlayerPrefs.SetFloat("ThrowSensitivity", 0.8f);
+
+        if (!PlayerPrefs.HasKey("OneShot"))
+            PlayerPrefs.SetInt("OneShot", 0);
+
+        if (PlayerPrefs.GetInt("Sound") == 1)
         {
             audioMusic.Play();
             textAudio.text = "AUDIO ON";
         }
-        else if (PlayerPrefs.GetInt("Audio") == 0)
+        else if (PlayerPrefs.GetInt("Sound") == 0)
         {
             audioMusic.Stop();
             textAudio.text = "AUDIO OFF";
@@ -114,8 +123,10 @@ public class MainMenuLogic : MonoBehaviour {
 
     }
 
-    public void GoToPlay() {
-        SceneManager.LoadScene("Level 1");
+    public void GoToPlay(string levelAux) {
+        CoreManager.Level.setLevelName(levelAux);
+        SceneManager.LoadScene("LoadingScene");
+       // SceneManager.LoadScene("Level "+level);
     }
 
     public void GoToExit() {
@@ -155,15 +166,15 @@ public class MainMenuLogic : MonoBehaviour {
     public void setSwitchMusicOnOff()
     {
 
-        if (PlayerPrefs.GetInt("Audio") == 0)
+        if (PlayerPrefs.GetInt("Sound") == 0)
         {
-            PlayerPrefs.SetInt("Audio", 1);
+            PlayerPrefs.SetInt("Sound", 1);
             audioMusic.Play();
             textAudio.text = "AUDIO ON";
         }
-        else if (PlayerPrefs.GetInt("Audio") == 1)
+        else if (PlayerPrefs.GetInt("Sound") == 1)
         {
-            PlayerPrefs.SetInt("Audio", 0);
+            PlayerPrefs.SetInt("Sound", 0);
             audioMusic.Stop();
             textAudio.text = "AUDIO OFF";
         }

@@ -3,23 +3,25 @@ using System.Collections;
 
 public class DigLogic: MonoBehaviour {
 
-	public float damage;
-	private Transform myTransform;
-	public Transform prefabPSDamage;
-	public Transform prefabPSFire;
-    private GameObject prefabDamage;
+	
+    public ParticleSystem psDigStones;
+    public ParticleSystem psDigStonesGround;
+    public PlayerLogic playerLogic;
 
-	public AudioManager audioManger;
+    private ParticleSystem.MainModule mainPSDigStones;
+    private ParticleSystem.MainModule mainPSDigStonesGround;
     private BoxCollider boxColliderDig;
-    private PlayerLogic playerLogic;
+    private Transform myTransform;
+
 	// Use this for initialization
 	void Start () {
-		audioManger = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
-        playerLogic = transform.parent.transform.GetComponent<PlayerLogic>();
+        myTransform = this.transform;
+        //playerLogic = myTransform.parent.transform.GetComponent<PlayerLogic>();
         boxColliderDig = GetComponent<BoxCollider>();
-		myTransform = this.transform;
-        prefabDamage = (GameObject)Instantiate(prefabPSDamage.gameObject, new Vector3(transform.position.x, transform.position.y, -2), Quaternion.identity);
-        prefabDamage.GetComponent<ParticleSystem>().Stop();
+        mainPSDigStones = psDigStones.main;
+        mainPSDigStonesGround = psDigStonesGround.main;
+        psDigStones.Stop();
+        psDigStonesGround.Stop();
     }
 
 	void OnTriggerEnter(Collider other){
@@ -30,12 +32,27 @@ public class DigLogic: MonoBehaviour {
             {
 
                 boxColliderDig.enabled = false;
-                prefabDamage.transform.position = new Vector3(myTransform.position.x, myTransform.position.y - 1, myTransform.position.z);
-                prefabDamage.GetComponent<ParticleSystem>().Play();
-                playerLogic.addPiece(other.GetComponent<BlockLogic>().type);
+                // psDigStones.transform.position = new Vector3(myTransform.position.x, myTransform.position.y - 1, myTransform.position.z);
+                if (playerLogic.state == PlayerLogic.PlayerStates.DASHDOWN_DIG)
+                {
 
-                audioManger.Play(audioManger.catchPieceBoss, transform.position);
-                Destroy(other.gameObject);
+                    mainPSDigStones.startSpeed = 40;
+                    psDigStones.Play();
+                    mainPSDigStonesGround.startSpeed = 50;
+                    psDigStonesGround.Play();
+                }
+                else {
+                    mainPSDigStones.startSpeed = 20;
+                    psDigStones.Play();
+                    mainPSDigStonesGround.startSpeed = 15;
+                    psDigStonesGround.Play();
+                }
+
+                playerLogic.addPiece(other.GetComponent<BlockLogic>().type);
+                
+                CoreManager.Audio.Play(CoreManager.Audio.playerDig, myTransform.position);
+                // Destroy(other.gameObject);
+                other.gameObject.SetActive(false);
             }
 		}
 

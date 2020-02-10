@@ -1,19 +1,20 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class GranadeLogic: MonoBehaviour {
 
-	private Transform myTransform;
-	public Transform prefabPSDamage;
-	public Transform prefabPSFire;
-	public AudioManager audioManger;
+	// private Transform myTransform;
+	// public Transform prefabPSDamage;
+	// public Transform prefabPSFire;
+	// public AudioManager audioManger;
     public int typeBullet;
-	// Use this for initialization
-	void Start () {
+    public bool isTouchedBird = false;
+    // Use this for initialization
+    /*
+    void Start () {
         
         myTransform = this.transform;
-
-	}
+        GetComponent<ConstantForce>().force = new Vector3(0, -125.0f, 0);
+    }*/
 
     // Update is called once per frame
     /*

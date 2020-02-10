@@ -21,7 +21,7 @@ namespace HardShellStudios.CompleteControl
             }
             catch
             {
-                Debug.LogError("No '" + DefaultName + "' found inside a Resources folder.");
+                // Debug.LogError("No '" + DefaultName + "' found inside a Resources folder.");
             }
 
             return null;
@@ -109,11 +109,13 @@ namespace HardShellStudios.CompleteControl
                     return keys;
                 }
                 else
-                    Debug.LogWarning("No Saved Bindings Found");
+                {
+                    // Debug.LogWarning("No Saved Bindings Found");
+                }
             }
             catch
             {
-                Debug.LogWarning("Bindings Error");
+                // Debug.LogWarning("Bindings Error");
             }
             
             return null;

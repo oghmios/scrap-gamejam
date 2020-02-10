@@ -15,7 +15,6 @@ public class PlayerLogic: MonoBehaviour {
 	private float lifePlayer;
 	public Transform explosionPlayer;
 	public Transform explosionPowerUp;
-	public AudioManager audioManager;
 	public SourceMovement sourceBullets;
     public MoveCharacter moveCharacter;
 	public Animator animatorCharacter;
@@ -42,28 +41,51 @@ public class PlayerLogic: MonoBehaviour {
     public float tempDigDown = 1;
     public float tempDigToIdle = 0.5f;
     public Color colorPrepareThrow, colorPrepareThrowMax;
+    public LineRenderer lineThrow;
+    public TrailRenderer lineDigDash; 
     private bool isCanceledThrow;
     public Transform shovelDie;
-
+    private Transform myTransform;
+    private float percentMediumThrow;
 
     private void Start(){
-
+        myTransform = this.transform;
         gravityOrig = moveCharacter.gravity;
-        // audioManager = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
-		piecesChar = new Queue<int>();
+
+        if (PlayerPrefs.GetInt("GuideThrow") == 1 && PlayerPrefs.GetInt("OneShot") == 0)
+            lineThrow.enabled = true;
+        else
+            lineThrow.enabled = false;
+
+        if (PlayerPrefs.GetFloat("ThrowSensitivity") == 0)
+        {
+            PlayerPrefs.SetFloat("ThrowSensitivity", 1f);
+            throwTime = 1;
+        }
+        else
+        {
+            throwTime = PlayerPrefs.GetFloat("ThrowSensitivity");
+        }
+
+        // CoreManager.Audio = GameObject.FindGameObjectWithTag("CoreManager.Audio").GetComponent<CoreManager.Audio>();
+        piecesChar = new Queue<int>();
 		// gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         pieceGlow.sprite = null;
         pieceGlow.color = new Color(0, 0, 0, 0);
         spriteCharacter.enabled = true;
         isThrow = false;
         isCanceledThrow = false;
+        lineDigDash.enabled = false;
         setIdle();
 	}
 
+    public Vector3 point1, point2, point3;
+    public int vertexCount = 12;
+    List<Vector3> pointList;
 
     void Update()
     {
-        
+
         switch (state)
         {
             case PlayerStates.IDLE:
@@ -123,6 +145,8 @@ public class PlayerLogic: MonoBehaviour {
             if ((hInput.GetButtonDown("Throw" + control) || hInput.GetAxis("Throw" + control) < 0 ||
                 hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count > 0 && !isCanceledThrow)
             {
+                if (PlayerPrefs.GetInt("GuideThrow") == 1 && PlayerPrefs.GetInt("OneShot") == 0)
+                    lineThrow.enabled = true;
 
                 isThrow = true;
                 // rigid.velocity = Vector3.up * jumpSpeed;
@@ -139,16 +163,52 @@ public class PlayerLogic: MonoBehaviour {
             if ((hInput.GetButtonDown("Throw" + control) || hInput.GetAxis("Throw" + control) < 0 ||
                 hInput.GetAxis("Throw" + control) > 0) && !isThrow && piecesChar.Count <= 0 && !isCanceledThrow)
             {
+                
+                lineThrow.enabled = false;
+
                 colorIntenvory.setAnimation();
             }
 
             if (isThrow && (hInput.GetButton("Throw" + control) || hInput.GetAxis("Throw" + control) < 0 ||
                 hInput.GetAxis("Throw" + control) > 0 && !isCanceledThrow))
             {
+                // one shot discrete
+                if (PlayerPrefs.GetInt("GuideThrow") == 1 && PlayerPrefs.GetInt("OneShot") == 1)
+                {
+                    lineThrow.enabled = true;
+                    pointList = new List<Vector3>();
 
+                    if (spriteCharacter.flipX)
+                    {
+                        // ONE SHOT
+                        point1 = new Vector3(-1.25f, 0.4f, 0);
+                        point2 = new Vector3(-8.75f, 17.5f, 0);
+                        point3 = new Vector3(-17f, 5.31f, 0);
+                    }
+                    else
+                    {
+                        // ONE SHOT
+                        point1 = new Vector3(1.25f, 0.4f, 0);
+                        point2 = new Vector3(8.75f, 17.5f, 0);
+                        point3 = new Vector3(17f, 5.31f, 0);
+                    }
+
+                    for (float ratio = 0; ratio <= 1; ratio += 1.0f / vertexCount)
+                    {
+                        Vector3 tangentLineVertex1 = Vector3.Lerp(point1, point2, ratio);
+                        Vector3 tangentLineVertex2 = Vector3.Lerp(point2, point3, ratio);
+                        Vector3 bezierPoint = Vector3.Lerp(tangentLineVertex1, tangentLineVertex2, ratio);
+                        pointList.Add(bezierPoint);
+                    }
+
+                    lineThrow.positionCount = pointList.Count;
+                    lineThrow.SetPositions(pointList.ToArray());
+                }
+
+                // organic shot
                 if (throwTimeCounter > 0)
                 {
-
+                    
                     // rigid.velocity = Vector3.up * jumpSpeed;
                     //setThrowBullet(throwTime - throwTimeCounter);
                     //animatorCharacter.SetTrigger("IsPrepareThrow");
@@ -162,15 +222,158 @@ public class PlayerLogic: MonoBehaviour {
                     {
                         throwTimeCounter -= Time.deltaTime;
                     }
+
+                    // SHOW THROW GUIDES
+                    if (PlayerPrefs.GetInt("GuideThrow") == 1 && PlayerPrefs.GetInt("OneShot") == 0)
+                    {
+                        lineThrow.enabled = true;
+                        pointList = new List<Vector3>();
+
+                        if ((throwTime - throwTimeCounter) <= sourceBullets.minLimitImpulse)
+                        {
+                            if (spriteCharacter.flipX)
+                            {
+                                // SHORT SHOT
+                                point1 = new Vector3(-1.25f, 0.4f, 0);
+                                point2 = new Vector3(-4.375f, 8.75f, 0);
+                                point3 = new Vector3(-8.5f, 2.65625f, 0);
+                            }
+                            else
+                            {
+                                // SHORT SHOT
+                                point1 = new Vector3(1.25f, 0.4f, 0);
+                                point2 = new Vector3(4.375f, 8.75f, 0);
+                                point3 = new Vector3(8.5f, 2.65625f, 0);
+                            }
+                            
+                        }
+                        else if ((throwTime - throwTimeCounter) > sourceBullets.minLimitImpulse && (throwTime - throwTimeCounter) < sourceBullets.maxLimitImpulse)
+                        {
+                            percentMediumThrow = ((((throwTime - throwTimeCounter) - sourceBullets.minLimitImpulse)) / (sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse));
+
+
+                            if (spriteCharacter.flipX)
+                            {
+                                // MEDIUM SHOT
+                                point1 = new Vector3(-1.25f, 0.4f, 0);
+
+                                point2 = new Vector3(-(4.375f * 0.7f + (percentMediumThrow * (17.5f - 4.375f))),
+                                       (8.75f * 0.7f + (percentMediumThrow * (35f - 8.75f))), 0);
+
+                                point3 = new Vector3(-(8.5f * 0.7f + (percentMediumThrow * (34 - 8.5f))),
+                                       (2.65625f * 0.7f + (percentMediumThrow * (10.625f - 2.65625f))), 0);
+
+                                /*
+                                point2 = new Vector3(-(((throwTime - throwTimeCounter) * 13.125f) / ((sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse) / 2 + sourceBullets.minLimitImpulse)), 
+                                        (((throwTime - throwTimeCounter) * 26.25f) / ((sourceBullets.maxLimitImpulse-sourceBullets.minLimitImpulse)/2 + sourceBullets.minLimitImpulse)), 0);
+
+                                point3 = new Vector3(-(((throwTime - throwTimeCounter) * 25.5f) / ((sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse) / 2 + sourceBullets.minLimitImpulse)), 
+                                        (((throwTime - throwTimeCounter) * 7.96875f) / ((sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse) / 2 + sourceBullets.minLimitImpulse)), 0);
+                                */
+                            }
+                            else
+                            {
+                                // MEDIUM SHOT
+                                point1 = new Vector3(1.25f, 0.4f, 0);
+                                
+                                point2 = new Vector3(4.375f * 0.7f + (percentMediumThrow * (17.5f - 4.375f)),
+                                       8.75f * 0.7f + (percentMediumThrow * (35f - 8.75f)), 0);
+
+                                point3 = new Vector3(8.5f * 0.7f + (percentMediumThrow * (34 - 8.5f)),
+                                       2.65625f*0.7f + (percentMediumThrow * (10.625f - 2.65625f)), 0);
+
+                               // Debug.Log("PERCENT: " + percentMediumThrow + " point2: "+ point2 + "point3: "+point3);
+
+                                /*
+                               point2 = new Vector3((((throwTime - throwTimeCounter) * 10) / ((sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse) / 2 + sourceBullets.minLimitImpulse)), 
+                                       (((throwTime - throwTimeCounter) * 18) / ((sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse) / 2 + sourceBullets.minLimitImpulse)), 0);
+
+                                   point3 = new Vector3((((throwTime - throwTimeCounter) * 18) / ((sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse) / 2 + sourceBullets.minLimitImpulse)), 
+                                       (((throwTime - throwTimeCounter) * 5) / ((sourceBullets.maxLimitImpulse - sourceBullets.minLimitImpulse) / 2 + sourceBullets.minLimitImpulse)), 0);
+                               */
+                            }
+                           // Debug.Log("MEDIO " + (throwTime - throwTimeCounter).ToString());
+                        }
+                        else if ((throwTime - throwTimeCounter) >= sourceBullets.maxLimitImpulse)
+                        {
+   
+                            if (spriteCharacter.flipX)
+                            {
+                                // LARGE SHOT
+                                point1 = new Vector3(-1.25f, 0.4f, 0);
+                                point2 = new Vector3(-17.5f, 35f, 0);
+                                point3 = new Vector3(-34, 10.625f, 0);
+                            }
+                            else
+                            {
+                                // LARGE SHOT
+                                point1 = new Vector3(1.25f, 0.4f, 0);
+                                point2 = new Vector3(17.5f, 35f, 0);
+                                point3 = new Vector3(34, 10.625f, 0);
+                            }
+                           // Debug.Log("LARGO "+ (throwTime - throwTimeCounter).ToString());
+                        }
+
+
+                        for (float ratio = 0; ratio <= 1; ratio += 1.0f / vertexCount)
+                        {
+                            Vector3 tangentLineVertex1 = Vector3.Lerp(point1, point2, ratio);
+                            Vector3 tangentLineVertex2 = Vector3.Lerp(point2, point3, ratio);
+                            Vector3 bezierPoint = Vector3.Lerp(tangentLineVertex1, tangentLineVertex2, ratio);
+                            pointList.Add(bezierPoint);
+                        }
+
+                        lineThrow.positionCount = pointList.Count;
+                        lineThrow.SetPositions(pointList.ToArray());
+                    }
                     spriteCharacter.color = colorPrepareThrow;
                 }
                 else
                 {
-                    throwTimeCounter = 0;
+                    if (PlayerPrefs.GetInt("GuideThrow") == 1 && PlayerPrefs.GetInt("OneShot") == 0)
+                    {
+                        lineThrow.enabled = true;
+                        pointList = new List<Vector3>();
+                        if (spriteCharacter.flipX)
+                        {
+                            // LARGE SHOT
+                            point1 = new Vector3(-1.25f, 0.4f, 0);
+                            point2 = new Vector3(-17.5f, 35f, 0);
+                            point3 = new Vector3(-34, 10.625f, 0);
+                        }
+                        else
+                        {
+                            // LARGE SHOT
+                            point1 = new Vector3(1.25f, 0.4f, 0);
+                            point2 = new Vector3(17.5f, 35f, 0);
+                            point3 = new Vector3(34, 10.625f, 0);
+                        }
+
+
+                        for (float ratio = 0; ratio <= 1; ratio += 1.0f / vertexCount)
+                        {
+                            Vector3 tangentLineVertex1 = Vector3.Lerp(point1, point2, ratio);
+                            Vector3 tangentLineVertex2 = Vector3.Lerp(point2, point3, ratio);
+                            Vector3 bezierPoint = Vector3.Lerp(tangentLineVertex1, tangentLineVertex2, ratio);
+                            pointList.Add(bezierPoint);
+                        }
+
+                        lineThrow.positionCount = pointList.Count;
+                        lineThrow.SetPositions(pointList.ToArray());
+                    }
+
+                    
+
+                        throwTimeCounter = 0;
                     // animatorCharacter.SetTrigger("IsPrepareThrow");
-                    spriteCharacter.color = colorPrepareThrowMax;
+                    if (PlayerPrefs.GetInt("OneShot") == 1)
+                        spriteCharacter.color = colorPrepareThrow;
+                    else
+                        spriteCharacter.color = colorPrepareThrowMax;
                     // isThrow = false;
                 }
+
+                
 
                 // Si se mantiene el lanzamiento y se da la tecla cavar, 
                 // se cancela  el lanzamiento
@@ -178,6 +381,7 @@ public class PlayerLogic: MonoBehaviour {
                 {
 
                     isThrow = false;
+                    lineThrow.enabled = false;
                     isCanceledThrow = true;
                     animatorCharacter.SetTrigger("isForcedToIdle");
                     spriteCharacter.color = Color.white;
@@ -188,7 +392,7 @@ public class PlayerLogic: MonoBehaviour {
 
             if (isThrow && (hInput.GetButtonUp("Throw" + control) || hInput.GetAxis("Throw" + control) == 0) && !isCanceledThrow)
             {
-
+                lineThrow.enabled = false;
                 //animatorCharacter.SetBool("IsPrepareThrow", false);            
                 setThrowBullet(throwTime - throwTimeCounter);
 
@@ -203,7 +407,7 @@ public class PlayerLogic: MonoBehaviour {
         moveCharacter.horizontalControl = true;
         moveCharacter.gravity = gravityOrig;
         colliderDig.enabled = false;
-        transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
+        myTransform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 		state = PlayerStates.IDLE;
 	}
 
@@ -219,7 +423,7 @@ public class PlayerLogic: MonoBehaviour {
             if (piecesChar.Count < 4 && moveCharacter.isGround)
             {
                 CameraShake.Shake(Vector3.one * 0.5f, 0.25f);
-                audioManager.Play(audioManager.Shoot, transform.position);
+                CoreManager.Audio.Play(CoreManager.Audio.playerDigImpossible, myTransform.position, Random.Range(0.8f, 1.2f));
                 animatorCharacter.SetTrigger("IsDig");
                 CameraShake.Shake(Vector3.one * 0.25f, 0.25f);
                 colliderDig.enabled = true;
@@ -237,7 +441,10 @@ public class PlayerLogic: MonoBehaviour {
     {
         if (gameLogic.state != GameLogic.GameStates.START)
         {
+            CoreManager.Audio.Play(CoreManager.Audio.playerDigDash, myTransform.position, Random.Range(0.8f, 1.2f));
             animatorCharacter.SetBool("IsDigDash", true);
+            lineDigDash.enabled = true;
+
             moveCharacter.horizontalControl = false;
             moveCharacter.gravity = gravityOrig * gravityMultiplier;
 
@@ -256,7 +463,8 @@ public class PlayerLogic: MonoBehaviour {
 
             if (piecesChar.Count < 4 && moveCharacter.isGround)
             {
-                audioManager.Play(audioManager.Shoot, transform.position);
+                lineDigDash.enabled = false;
+                CoreManager.Audio.Play(CoreManager.Audio.playerDigImpossible, myTransform.position, Random.Range(0.8f, 1.2f));
                 animatorCharacter.SetBool("IsDigDash", true);
                 CameraShake.Shake(Vector3.one * 0.5f, 0.35f);
                 colliderDig.enabled = true;
@@ -264,6 +472,7 @@ public class PlayerLogic: MonoBehaviour {
             }
             else if (piecesChar.Count >= 4 && moveCharacter.isGround)
             {
+                lineDigDash.enabled = false;
                 animatorCharacter.SetBool("IsDigDash", false);
                 colorIntenvory.setAnimation();
                 setIdle();
@@ -281,13 +490,18 @@ public class PlayerLogic: MonoBehaviour {
 
     }
 
-	public void setDie(){
-        //transform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
+	public void setDie(int loseMode){
+        //myTransform.GetComponentInChildren<SpriteRenderer>().color = Color.white;
 
         //animatorCharacter.SetBool("isDie", true);
         //animatorCharacter.transform.localPosition = new Vector3(animatorCharacter.transform.localPosition.x, -0.5f, animatorCharacter.transform.localPosition.z); 
 
         animatorCharacter.SetTrigger("isDied");
+        
+        // PLAYER DEAD  == 0
+        if (loseMode == 0)
+            CoreManager.Audio.Play(CoreManager.Audio.playerDie, myTransform.position);
+        
         shovelDie.gameObject.SetActive(true);
         shovelDie.transform.parent = null;
         GetComponent<MoveCharacter>().enabled = false;
@@ -296,8 +510,8 @@ public class PlayerLogic: MonoBehaviour {
         GetComponent<Rigidbody>().drag = 1;
         GetComponent<CapsuleCollider>().radius = 0;
         GetComponent<CapsuleCollider>().height = 0;
-        audioManager.Play (audioManager.bossExplosion,transform.position);
-		GameObject explosion = (GameObject)Instantiate(explosionPlayer.gameObject,transform.position,Quaternion.identity);
+        
+		GameObject explosion = (GameObject)Instantiate(explosionPlayer.gameObject, myTransform.position,Quaternion.identity);
 		//Destroy (explosion,2);
 		temp = 3f;
 		
@@ -309,7 +523,7 @@ public class PlayerLogic: MonoBehaviour {
         
         if (piecesChar.Count > 0 && sourceBullets.state == SourceMovement.PlayerAttackStates.NONE)
         {
-            audioManager.Play(audioManager.playerThrow, transform.position);
+            CoreManager.Audio.Play(CoreManager.Audio.playerThrow, myTransform.position, Random.Range(0.8f, 1.2f));
             // temp = 2;
             // SI SUPERA LAS PIEZAS A ACUMULAR SE QUITA LA ULTIMA
             int pieceMode = piecesChar.Dequeue();
@@ -507,7 +721,7 @@ public class PlayerLogic: MonoBehaviour {
             // Destroy(this.gameObject);
             if (gameLogic.state != GameLogic.GameStates.LOSE)
             {
-                gameLogic.setLose();
+                gameLogic.setLose(0);
                 this.enabled = false;
             }
 		}
@@ -537,14 +751,14 @@ public class PlayerLogic: MonoBehaviour {
 		}
 
 		if(other.tag == "PowerUp"){
-			GameObject explosion = (GameObject)Instantiate(explosionPowerUp.gameObject,transform.position,Quaternion.identity);
+			GameObject explosion = (GameObject)Instantiate(explosionPowerUp.gameObject,myTransform.position,Quaternion.identity);
 			Destroy (explosion,2);
 			
 		}
 
 	}*/
 
-	public void addPiece(int idPiece){
+    public void addPiece(int idPiece){
 
         
 

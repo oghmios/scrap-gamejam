@@ -7,7 +7,7 @@ public class ObjectRotator : MonoBehaviour
 	public float speed;
 	public Dimensions dimension;
 
-	void Update () {
+	void FixedUpdate () {
 
 		switch(dimension){
 			case Dimensions.X:

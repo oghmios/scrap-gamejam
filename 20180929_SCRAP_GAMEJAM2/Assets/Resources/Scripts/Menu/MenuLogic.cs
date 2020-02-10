@@ -19,24 +19,67 @@ public class MenuLogic : MonoBehaviour {
     public GameObject buttonGraphics;
 	public int prevOption;
     public Text textAudio;
-
+    public Text textThrowGuide;
+    public Text textOneShot;
+    public InputField fieldOneShot;
+    public Slider sliderTimeThrow;
+    public Text textSliderTimeThrow;
+    public Button setImpulseButton;
+    public SourceMovement sourceMovement;
+    public PlayerLogic playerLogic;
     public AudioSource audioMusic;
 
     // Use this for initialization
     void Start () {
 
-        if (!PlayerPrefs.HasKey("Audio"))
-            PlayerPrefs.SetInt("Audio", 1);
-
-        if (PlayerPrefs.GetInt("Audio") == 1)
+        if (PlayerPrefs.GetInt("Sound") == 1)
         {
             audioMusic.Play();
             textAudio.text = "AUDIO ON";
         }
-        else if (PlayerPrefs.GetInt("Audio") == 0)
+        else if (PlayerPrefs.GetInt("Sound") == 0)
         {
             audioMusic.Stop();
             textAudio.text = "AUDIO OFF";
+        }
+
+        if (PlayerPrefs.GetInt("GuideThrow") == 1)
+        {
+
+            textThrowGuide.text = "THROW GUIDE ON";
+        }
+        else if (PlayerPrefs.GetInt("GuideThrow") == 0)
+        {
+            textThrowGuide.text = "THROW GUIDE OFF";
+        }
+
+        if (PlayerPrefs.GetInt("OneShot") == 1)
+        {
+            textOneShot.text = "ONE SHOT ON";
+            sliderTimeThrow.gameObject.SetActive(false);
+            setImpulseButton.gameObject.SetActive(true);
+            fieldOneShot.gameObject.SetActive(true);
+        }
+        else if (PlayerPrefs.GetInt("OneShot") == 0)
+        {
+            textOneShot.text = "ONE SHOT OFF";
+            sliderTimeThrow.gameObject.SetActive(true);
+            setImpulseButton.gameObject.SetActive(false);
+            fieldOneShot.gameObject.SetActive(false);
+        }
+
+        if (!PlayerPrefs.HasKey("ThrowSensitivity"))
+        {
+            PlayerPrefs.SetFloat("ThrowSensitivity", 0.8f);
+            playerLogic.throwTime = 0.8f;
+            sourceMovement.maxLimitImpulse = 0.8f;
+            setSlideTimeThrow();
+        }
+        else
+        {
+            playerLogic.throwTime = PlayerPrefs.GetFloat("ThrowSensitivity");
+            sourceMovement.maxLimitImpulse = PlayerPrefs.GetFloat("ThrowSensitivity");
+            setSlideTimeThrow();
         }
 
         if (panelTutorial!=null)
@@ -158,18 +201,71 @@ public class MenuLogic : MonoBehaviour {
 
     public void setSwitchMusicOnOff()
     {
-        if (PlayerPrefs.GetInt("Audio") == 0)
+        if (PlayerPrefs.GetInt("Sound") == 0)
         {
-            PlayerPrefs.SetInt("Audio", 1);
+            PlayerPrefs.SetInt("Sound", 1);
             audioMusic.Play();
             textAudio.text = "AUDIO ON";
         }
-        else if (PlayerPrefs.GetInt("Audio") == 1)
+        else if (PlayerPrefs.GetInt("Sound") == 1)
         {
-            PlayerPrefs.SetInt("Audio", 0);
+            PlayerPrefs.SetInt("Sound", 0);
             audioMusic.Stop();
             textAudio.text = "AUDIO OFF";
         }
+    }
+
+    public void setSwitchThrowGuide()
+    {
+        if (PlayerPrefs.GetInt("GuideThrow") == 0)
+        {
+            PlayerPrefs.SetInt("GuideThrow", 1);
+            textThrowGuide.text = "THROW GUIDE ON";
+        }
+        else if (PlayerPrefs.GetInt("GuideThrow") == 1)
+        {
+            PlayerPrefs.SetInt("GuideThrow", 0);
+            textThrowGuide.text = "THROW GUIDE OFF";
+        }
+    }
+
+    public void setSwitchOneShot()
+    {
+        if (PlayerPrefs.GetInt("OneShot") == 0)
+        {
+            PlayerPrefs.SetInt("OneShot", 1);
+            textOneShot.text = "ONE SHOT ON";
+            setImpulseButton.gameObject.SetActive(true);
+            fieldOneShot.gameObject.SetActive(true);
+            sliderTimeThrow.gameObject.SetActive(false);
+        }
+        else if (PlayerPrefs.GetInt("OneShot") == 1)
+        {
+            PlayerPrefs.SetInt("OneShot", 0);
+            textOneShot.text = "ONE SHOT OFF";
+            setImpulseButton.gameObject.SetActive(false);
+            fieldOneShot.gameObject.SetActive(false);
+            sliderTimeThrow.gameObject.SetActive(true);
+        }
+    }
+
+    public void setTimeThrow() {
+        PlayerPrefs.SetFloat("ThrowSensitivity", sliderTimeThrow.value);
+        playerLogic.throwTime = sliderTimeThrow.value;
+        sourceMovement.maxLimitImpulse = sliderTimeThrow.value;
+        textSliderTimeThrow.text = "IMPULSE SENSITIVITY: " + sliderTimeThrow.value.ToString("0.0");
+    }
+
+    public void setSlideTimeThrow() {
+        PlayerPrefs.SetFloat("ThrowSensitivity", sliderTimeThrow.value);
+        sliderTimeThrow.value = playerLogic.throwTime;
+        textSliderTimeThrow.text = "IMPULSE SENSITIVITY: " + sliderTimeThrow.value.ToString("0.0");
+    }
+
+    public void setOneShotImpulse()
+    {
+        
+        sourceMovement.oneShotImpulse = float.Parse(fieldOneShot.text);
     }
 
     public void selectPrevButton()

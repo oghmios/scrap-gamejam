@@ -1,17 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 
 public class BlockGridLogic : MonoBehaviour {
 
     public enum BlockGridLogicStates { NONE, SLEEP, PREPARE, MOVE }
     public BlockGridLogicStates state;
-
     public GameObject[] blockTypes;
     public GameObject blockHeavy;
     public GameObject[][] lineOfBlocks; // = new GameObject[10][];
+    public ParticleSystem earthQuake;
     private Quaternion rotation;
     private System.Random randomBlockNumber;
     private Vector3 position2Move;
@@ -112,6 +111,7 @@ public class BlockGridLogic : MonoBehaviour {
 
     public void SetSleep()
     {
+        // earthQuake.Stop();
         timeDecay = time2Move;
         state = BlockGridLogicStates.SLEEP;
     }
@@ -124,7 +124,23 @@ public class BlockGridLogic : MonoBehaviour {
     }
 
     public void SetMove() {
+        //  ParticleSystem.MainModule mainPS = earthQuake.main;
+        //  mainPS.duration = 3;
+        // CoreManager.Audio.Play(CoreManager.Audio.blocksMoving, transform.position);
+        switch (Random.Range(0, 3))
+        {
+            case 0:
+                CoreManager.Audio.Play(CoreManager.Audio.blocksMoving01, myTransform.position);
+                break;
+            case 1:
+                CoreManager.Audio.Play(CoreManager.Audio.blocksMoving02, myTransform.position);
+                break;
+            case 2:
+                CoreManager.Audio.Play(CoreManager.Audio.blocksMoving03, myTransform.position);
+                break;
+        }
 
+        earthQuake.Play();
         CameraShake.Shake(Vector3.one, 0.5f);
 
         state = BlockGridLogicStates.MOVE;
