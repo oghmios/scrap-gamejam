@@ -46,6 +46,9 @@ public class UIChangeColor : MonoBehaviour
         states = ColorStates.ANIMATION;
 	}
 
+    public void setDead() {
+        imageUI.color = Color.black;
+    }
 
 	// Behaviours
 

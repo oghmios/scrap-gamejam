@@ -8,6 +8,7 @@ public class BlockLogic : MonoBehaviour {
    //  public int endurance;
    //  public int score;
     public int type;
+    public bool challengeBlock = false;
     /*
     void Update()
     {

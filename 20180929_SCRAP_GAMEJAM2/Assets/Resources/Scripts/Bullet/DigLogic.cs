@@ -7,6 +7,7 @@ public class DigLogic: MonoBehaviour {
     public ParticleSystem psDigStones;
     public ParticleSystem psDigStonesGround;
     public PlayerLogic playerLogic;
+    public GameLogic gameLogic;
 
     private ParticleSystem.MainModule mainPSDigStones;
     private ParticleSystem.MainModule mainPSDigStonesGround;
@@ -31,6 +32,10 @@ public class DigLogic: MonoBehaviour {
             if (other.GetComponent<BlockLogic>().type <= 3)
             {
 
+                if (other.GetComponent<BlockLogic>().challengeBlock) {
+                    gameLogic.setChallengeBlock();
+                }
+
                 boxColliderDig.enabled = false;
                 // psDigStones.transform.position = new Vector3(myTransform.position.x, myTransform.position.y - 1, myTransform.position.z);
                 if (playerLogic.state == PlayerLogic.PlayerStates.DASHDOWN_DIG)
@@ -49,7 +54,7 @@ public class DigLogic: MonoBehaviour {
                 }
 
                 playerLogic.addPiece(other.GetComponent<BlockLogic>().type);
-                
+                gameLogic.substractBlockRamaining();
                 CoreManager.Audio.Play(CoreManager.Audio.playerDig, myTransform.position);
                 // Destroy(other.gameObject);
                 other.gameObject.SetActive(false);

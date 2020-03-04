@@ -6,16 +6,20 @@ using UnityEngine.EventSystems;
 
 public class GameLogic : MonoBehaviour {
 
-    
-    // GAME
-	public enum GameStates {START, GAME, PAUSE, VICTORY, VICTORY_ULTIMATE, LOSE, RESULTS }
+    [Header("PLAYERS")]
+    public PlayerLogic player1;
+ 
+    public MoveCharacter player1Movement;
+
+    public enum GameStates {START, GAME, PAUSE, VICTORY, VICTORY_ULTIMATE, LOSE, RESULTS }
     [Header("GAME SETTINGS")]
     public GameStates state;
-	private float temp;
+    protected float temp;
     public int scoreGoal, scorePerfect;
     public int currentScore = 0;
     public Text textScore, textScoreGoal, textScorePerfect;
     public RectTransform objectScoreGoal;
+    public bool challengeBlocks;
 
     public EventSystem eventsystem;
     public GameObject buttonVictoryNextLevel, buttonLoseRestart;
@@ -34,7 +38,7 @@ public class GameLogic : MonoBehaviour {
     // BLOCKS
     [Header("BLOCKS SETTINGS")]
     public BlockGridLogic blockGridLogic;
-    public int numRows, numColumns, numHeavyRows;
+    public int numRows, numColumns, numChallengeRows, numHeavyRows;
     public float timeToMoveBlocks;
 
     // INTERFACES
@@ -44,8 +48,8 @@ public class GameLogic : MonoBehaviour {
     public Transform panelBuzzTime;
     public Text textBuzzerTime;
     public Image frameBuzzer;
-    private GameObject[] bulletsInTheAir;
-    private Transform myTransform;
+    protected GameObject[] bulletsInTheAir;
+    protected Transform myTransform;
 
     // INTERFACES
     [Header("INTERFACE SETTINGS")]
@@ -54,40 +58,37 @@ public class GameLogic : MonoBehaviour {
     public Transform interfacePause;
     public Transform interfaceGameOver;
     public Transform interfaceVictory;
-    public PlayerLogic player;
-    public MoveCharacter playerMovement;
     public FadeScreen fadeScreen;
-    public Text infoText, infoTextPerfect, textSecretScore;
+    public Text infoText, infoTextPerfect, textSecretScore, TextChallengeBlockFail;
     public Image scoreImageMask;
     public Image scoreImage;
     public Image imgStarGoal, imgTrophyPerfect;
-    public Image imgBarGoal, imgBarPerfect, imgJewelSecret;
+    public Image imgBarGoal, imgBarPerfect, imgJewelSecret, imgCrossChallenge;
     public Animator wallBlocksAnim;
     public ParticleSystem psWallBlocks;
+    public int blocksRemaining;
     // private Color colorBarFill = new Color32(26, 219, 0, 255);
-    private Color colorBarGoal = new Color32(255, 180, 0, 255);
-    private Color colorBarGoalScore = new Color32(255, 200, 0, 255);
-    private Color colorBarFull = new Color32(255, 230, 0, 255);
-    private Color colorBarFullScore = new Color32(255, 250, 0, 255);
-    private float animationTime = 2f, currentNumber, initialNumber, desiredNumber;
-    private bool getScoreGoal, getScorePerfect;
-    private bool isFinishRestart = false, isFinishNext = false;
-    public Image ImgVictoryPerfect, ImgVictoryPajaroto, ImgVictorySlotPerfect, ImgVictorySlotPajaroto;
+    protected Color colorBarGoal = new Color32(255, 180, 0, 255);
+    protected Color colorBarGoalScore = new Color32(255, 200, 0, 255);
+    protected Color colorBarFull = new Color32(255, 230, 0, 255);
+    protected Color colorBarFullScore = new Color32(255, 250, 0, 255);
+    protected float animationTime = 2f, currentNumber, initialNumber, desiredNumber;
+    protected bool getScoreGoal, getScorePerfect;
+    protected bool isFinishRestart = false, isFinishNext = false;
+    public Image ImgVictoryPerfect, ImgVictoryPajaroto, ImgVictoryChallengeBlocks, ImgVictorySlotPerfect, ImgVictorySlotPajaroto, ImgVictorySlotChallengeBlocks;
 
     // Use this for initialization
     void Start () {
+
         myTransform = this.transform;
         Cursor.visible = false;
-        // CoreManager.Audio = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
         PlayerPrefs.SetString("Level",SceneManager.GetActiveScene().name);
-		// player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerLogic>();
-        // playerMovement = GameObject.FindGameObjectWithTag("Player").GetComponent<MoveCharacter>();
         fadeScreen.startFade(false, 0.5f);
         setStart();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	public virtual void Update () {
 	
 		switch(state){
 
@@ -159,7 +160,7 @@ public class GameLogic : MonoBehaviour {
             }
         }
 
-        textScore.text = "Score: "+currentNumber.ToString("00"); // +"/"+ scorePerfect.ToString();
+        textScore.text = currentNumber.ToString("00"); // +"/"+ scorePerfect.ToString();
 
         if (state == GameStates.VICTORY || state == GameStates.VICTORY_ULTIMATE) {
             AudioSource[] sounds = Object.FindObjectsOfType<AudioSource>();
@@ -175,10 +176,8 @@ public class GameLogic : MonoBehaviour {
     }
 
 	// SETS
-	public void setStart(){
+	public virtual void setStart(){
         Time.timeScale = 1;
-        
-
 
         if (scoreGoal > scorePerfect) {
             scorePerfect = scoreGoal;
@@ -193,13 +192,15 @@ public class GameLogic : MonoBehaviour {
         if (!interfaceGameplay.gameObject.activeSelf)
             interfaceGameplay.gameObject.SetActive(true);
         // textScoreGoal.text = "<color=yellow>"+scoreGoal.ToString()+ "</color> GOAL";
-        textScore.text = "Score: "+currentScore.ToString(); // + "/"+ scorePerfect.ToString();
+        textScore.text = currentScore.ToString(); // + "/"+ scorePerfect.ToString();
         textScoreGoal.text = scoreGoal.ToString();
         textScorePerfect.text = scorePerfect.ToString();
         // new Vector3(((scoreGoal/scorePerfect)*140)+objectScoreGoal.position.x
         objectScoreGoal.localPosition = new Vector3(objectScoreGoal.localPosition.x+ (((float)scoreGoal / (float)scorePerfect) * 140f), objectScoreGoal.localPosition.y, objectScoreGoal.localPosition.z);
         scoreImageMask.fillAmount = (float)currentScore / scorePerfect;
         // scoreImage.color = colorBarFill;
+
+        challengeBlocks = false;
 
         panelBuzzTime.gameObject.SetActive(false);
         interfacePause.gameObject.SetActive(false);
@@ -208,7 +209,7 @@ public class GameLogic : MonoBehaviour {
         
 
         // INITIALIZE BLOCKS
-        blockGridLogic.setCreateBlocks(numRows, numColumns, numHeavyRows, timeToMoveBlocks);
+        blockGridLogic.setCreateBlocks(numRows, numColumns, numChallengeRows, numHeavyRows, timeToMoveBlocks);
         blockGridLogic.SetNone();
         
         temp = 1;
@@ -229,63 +230,62 @@ public class GameLogic : MonoBehaviour {
         state = GameStates.GAME;
     }
 
-    public void setGame(){
+    public virtual void setGame(){
         Time.timeScale = 1;
 
         menuLogic.prevOption = 0;
         interfacePause.gameObject.SetActive(false);
         interfaceGameplay.gameObject.SetActive(true);
 
-        blockGridLogic.SetSleep();
-        player.setIdle();
-        player.transform.GetComponent<MoveCharacter>().enabled = true;
-        player.enabled = true;
+        if (blockGridLogic.state != BlockGridLogic.BlockGridLogicStates.STRESS_MODE)
+            blockGridLogic.SetSleep();
+        else
+            blockGridLogic.SetStressMode();
+        player1.setIdle();
+        player1Movement.enabled = true;
+        player1.enabled = true;
 
         state = GameStates.GAME;
 	}
 
-    public void setPause()
+    public virtual void setPause()
     {
+
         Time.timeScale = 0;
         interfaceGameplay.gameObject.SetActive(false);
         interfacePause.gameObject.SetActive(true);
         menuLogic.GotoMainMenu();
 
         blockGridLogic.SetNone();
-        player.setNone();
-        player.transform.GetComponent<MoveCharacter>().enabled = false;
-        player.enabled = false;
+        player1.setNone();
+        player1Movement.enabled = false;
+        player1.enabled = false;
 
-        
         state = GameStates.PAUSE;
     }
 
-    public void setVictory() {
+    public virtual void setVictory() {
 
         Time.timeScale = timeScaleBuzzerTime;
         
         temp = slowMotionTime;
         // INCREASE THE SPEED OF THE PLAYER
-        playerMovement.speed = playerMovement.speed * 1.5f;
-        //playerMovement.jumpSpeed = playerMovement.jumpSpeed * 1.5f;
-        playerMovement.gravity = playerMovement.gravity * 1.5f;
-        player.tempDig = player.tempDig * 0.5f;
-        player.tempDigDown = player.tempDigDown * 0.5f;
-        player.tempDigToIdle = player.tempDigToIdle * 0.5f;
-        player.animatorCharacter.speed = player.animatorCharacter.speed * 1.5f;
-        // player.throwTime = player.throwTime * 0.5f;
-        // playerMovement.gravity = player.gravityOrig * player.gravityMultiplier;
+        player1Movement.speed = player1Movement.speed * 1.5f;
+        player1Movement.gravity = player1Movement.gravity * 1.5f;
+        player1.tempDig = player1.tempDig * 0.5f;
+        player1.tempDigDown = player1.tempDigDown * 0.5f;
+        player1.tempDigToIdle = player1.tempDigToIdle * 0.5f;
+        player1.animatorCharacter.speed = player1.animatorCharacter.speed * 1.5f;
 
         CoreManager.Audio.Play(CoreManager.Audio.buzzerScore, myTransform.position);
+        /*
         infoText.rectTransform.localPosition = new Vector3(0,175,0);
         infoText.rectTransform.localScale = new Vector3(1, 1, 0);
         infoText.color = colorBarGoal;
         infoText.text = "LEVEL COMPLETE!";
-
+        */
         // SHOW BUZZ TIME
         panelBuzzTime.gameObject.SetActive(true);
-
-        
 
         blockGridLogic.SetNone();
         // player.enabled = false;
@@ -295,9 +295,6 @@ public class GameLogic : MonoBehaviour {
 
     public void setVictoryUltimate() {
         Time.timeScale = 1f;
-
-        
-
         // playerMovement.enabled = false;
         //player.setNone();
         temp = 3;
@@ -307,7 +304,7 @@ public class GameLogic : MonoBehaviour {
         state = GameStates.VICTORY_ULTIMATE;
     }
 
-    public void setResults() {
+    public virtual void setResults() {
 
         AudioSource[] sounds = Object.FindObjectsOfType<AudioSource>();
 
@@ -318,7 +315,34 @@ public class GameLogic : MonoBehaviour {
 
         }
 
+        panelBuzzTime.gameObject.SetActive(false);
+        interfaceGameplay.gameObject.SetActive(true);
+        interfaceVictory.gameObject.SetActive(true);
+        interfaceGameOver.gameObject.SetActive(false);
+
         if (currentScore >= scorePerfect)
+        {
+            ImgVictoryPerfect.enabled = true;
+            ImgVictoryPerfect.color = Color.white;
+            ImgVictorySlotPerfect.color = Color.blue;
+            ImgVictoryPerfect.GetComponent<Animator>().SetTrigger("IsIncreased");
+        }
+
+        if (imgJewelSecret != null && imgJewelSecret.enabled) {
+            ImgVictoryPajaroto.enabled = true;
+            ImgVictoryPajaroto.color = Color.white;
+            ImgVictorySlotPajaroto.color = Color.blue;
+            ImgVictoryPajaroto.GetComponent<Animator>().SetTrigger("IsIncreased");
+        }
+
+        if (!challengeBlocks && ImgVictoryChallengeBlocks!=null && ImgVictorySlotChallengeBlocks!=null) {
+            ImgVictoryChallengeBlocks.enabled = true;
+            ImgVictoryChallengeBlocks.color = Color.white;
+            ImgVictorySlotChallengeBlocks.color = Color.blue;
+            ImgVictoryChallengeBlocks.GetComponent<Animator>().SetTrigger("IsIncreased");
+        }
+
+        if (currentScore >= scorePerfect && imgJewelSecret!=null && imgJewelSecret.enabled && !challengeBlocks)
         {
             infoTextPerfect.text = "PERFECT!";
             switch (Random.Range(0, 2))
@@ -330,7 +354,7 @@ public class GameLogic : MonoBehaviour {
                     CoreManager.Audio.Play(CoreManager.Audio.playerLaughtLong02, myTransform.position);
                     break;
             }
-            //  CoreManager.Audio.Play(CoreManager.Audio.playerLaughtLong, myTransform.position);
+
         }
         else
         {
@@ -345,32 +369,13 @@ public class GameLogic : MonoBehaviour {
             }
         }
 
-        interfaceGameplay.gameObject.SetActive(true);
-        interfaceVictory.gameObject.SetActive(true);
-        interfaceGameOver.gameObject.SetActive(false);
-
-        if (currentScore >= scorePerfect)
-        {
-            ImgVictoryPerfect.enabled = true;
-            ImgVictoryPerfect.color = Color.white;
-            ImgVictorySlotPerfect.color = Color.blue;
-            ImgVictoryPerfect.GetComponent<Animator>().SetTrigger("IsIncreased");
-        }
-
-        if (imgJewelSecret.enabled) {
-            ImgVictoryPajaroto.enabled = true;
-            ImgVictoryPajaroto.color = Color.white;
-            ImgVictorySlotPajaroto.color = Color.blue;
-            ImgVictoryPajaroto.GetComponent<Animator>().SetTrigger("IsIncreased");
-        }
-
-            temp = 3;
+        temp = 3;
         eventsystem.SetSelectedGameObject(buttonVictoryNextLevel);
 
         state = GameStates.RESULTS;
     }
 
-	public void setLose(int loseMode){
+	public virtual void setLose(int loseMode){
         temp = 4;
 
         interfaceVictory.gameObject.SetActive(false);
@@ -378,23 +383,22 @@ public class GameLogic : MonoBehaviour {
         interfaceGameOver.gameObject.SetActive(true);
         blockGridLogic.SetNone();
 
-        if (player.state != PlayerLogic.PlayerStates.DIE)
-        player.setDie(loseMode);
+        if (player1.state != PlayerLogic.PlayerStates.DIE)
+        player1.setDie(loseMode);
 
-        player.transform.GetComponent<MoveCharacter>().enabled = false;
-        player.enabled = false;
+        player1Movement.enabled = false;
+        player1.enabled = false;
 
-        // BLOCKS TOUCH SPIKES == 1
-        // Particle System blocks
-        // BlockWall Movement down to up
-        if (loseMode == 1)
-        {
-            psWallBlocks.Play();
-            CameraShake.Shake(Vector3.one * 3, 2f);
-            CoreManager.Audio.Play(CoreManager.Audio.explosionStones, myTransform.position, 2);
-            wallBlocksAnim.SetTrigger("isUp");
-
-        }
+            // BLOCKS TOUCH SPIKES == 1
+            // Particle System blocks
+            // BlockWall Movement down to up
+            if (loseMode == 1)
+            {
+                psWallBlocks.Play();
+                CameraShake.Shake(Vector3.one * 3, 2f);
+                CoreManager.Audio.Play(CoreManager.Audio.explosionStones, myTransform.position, 2);
+                wallBlocksAnim.SetTrigger("isUp");
+            }
 
         eventsystem.SetSelectedGameObject(buttonLoseRestart);
 
@@ -403,20 +407,18 @@ public class GameLogic : MonoBehaviour {
 
     public void setGoToMainMenu()
     {
-        // Application.LoadLevel("Menu");
         SceneManager.LoadScene("Menu");
     }
 
     public void setRestartLevel()
     {
         SceneManager.LoadScene(PlayerPrefs.GetString("Level"));
-        // Application.LoadLevel(PlayerPrefs.GetString("Level"));
     }
 
     // BEHAVIOURS
-    private bool aux0, aux1, aux2, aux3;
+    protected bool aux0, aux1, aux2, aux3;
 
-    private void StartBehaviour(){
+    protected void StartBehaviour(){
        /* if (hInput.GetButtonDown("Cancel_J1"))
         {
             setPause();
@@ -481,7 +483,7 @@ public class GameLogic : MonoBehaviour {
         
     }
 
-	private void GameBehaviour()
+    protected void GameBehaviour()
     {
         if (hInput.GetButtonDown("Cancel_J1"))
         {
@@ -489,7 +491,7 @@ public class GameLogic : MonoBehaviour {
         }
     }
 
-    private void PauseBehaviour()
+    protected void PauseBehaviour()
     {
         if (hInput.GetButtonDown("Cancel_J1"))
         {
@@ -497,11 +499,11 @@ public class GameLogic : MonoBehaviour {
         }
     }
 
-    private void CleanEnvironmentVictoryBehaviour(){
+    protected void CleanEnvironmentVictoryBehaviour(){
 		
 	}
 
-    private void VictoryBehaviour(){
+    public virtual void VictoryBehaviour(){
 
         temp -= Time.deltaTime;
 
@@ -514,24 +516,26 @@ public class GameLogic : MonoBehaviour {
             textBuzzerTime.color = Color.red;
             frameBuzzer.color = Color.red;
 
-            if (playerMovement.isGround)
+            if (player1Movement.isGround)
             {
-                player.GetComponent<Rigidbody>().isKinematic = true;
-                player.setIdle();
-                player.setNone();
+                player1.GetComponent<Rigidbody>().isKinematic = true;
+                player1.setIdle();
+                player1.setNone();
             }
 
             bulletsInTheAir = GameObject.FindGameObjectsWithTag("Bullet");
 
-            if (bulletsInTheAir.Length <= 0 && playerMovement.isGround)
-            {
-                setVictoryUltimate();
-            }
+            
+                if (bulletsInTheAir.Length <= 0 && player1Movement.isGround)
+                {
+                    setVictoryUltimate();
+                }
+
         }
         
     }
-    
-    private void VictoryUltimateBehaviour() {
+
+    public virtual void VictoryUltimateBehaviour() {
 
         temp -= Time.deltaTime;
 
@@ -540,22 +544,7 @@ public class GameLogic : MonoBehaviour {
             setResults();
             
         }
-        /*temp -= Time.deltaTime;
 
-		if(temp<0){
-
-			string level = PlayerPrefs.GetString("Level");
-			string[] cadenas = level.Split(" "[0]);
-			// Parse.int(cadenas[1]);
-			Debug.Log (cadenas[1]);
-			int contLevel =  int.Parse(cadenas[1])+1;
-			if(contLevel<=5){
-				Application.LoadLevel("Level "+(contLevel).ToString());
-			} else {
-				Application.LoadLevel("Menu");
-			}
-			
-		}*/
     }
 
     public void setGoToNextLevel() {
@@ -564,6 +553,7 @@ public class GameLogic : MonoBehaviour {
         infoText.text = "";
         panelBuzzTime.gameObject.SetActive(false);
         interfacePause.gameObject.SetActive(false);
+        if (interfaceGameOver!=null)
         interfaceGameOver.gameObject.SetActive(false);
         interfaceVictory.gameObject.SetActive(false);
         interfaceGameplay.gameObject.SetActive(false);
@@ -576,14 +566,13 @@ public class GameLogic : MonoBehaviour {
         infoText.text = "";
         panelBuzzTime.gameObject.SetActive(false);
         interfacePause.gameObject.SetActive(false);
-        interfaceGameOver.gameObject.SetActive(false);
+        if (interfaceGameOver != null)
+            interfaceGameOver.gameObject.SetActive(false);
         interfaceVictory.gameObject.SetActive(false);
         interfaceGameplay.gameObject.SetActive(false);
     }
 
-    private void ResultsBehaviour() {
-        // if (hInput.GetButtonDown("Cancel_J1"))
-        // if (hInput.GetButtonDown("Submit_J1"))     
+    protected void ResultsBehaviour() {  
 
         if (fadeScreen.isFadeIn())
         {
@@ -595,7 +584,7 @@ public class GameLogic : MonoBehaviour {
         }
     }
 
-    private void LoseBehaviour(){
+    protected void LoseBehaviour(){
 
         if (fadeScreen.isFadeIn())
         {
@@ -607,7 +596,7 @@ public class GameLogic : MonoBehaviour {
         }
     }
 
-    public void AddScore(int blockType, bool hitsBird) {
+    public virtual void AddScore(bool IsPlayer1, int blockType, bool hitsBird) {
 
          textScore.GetComponent<Animator>().SetTrigger("isIncreased");
 
@@ -638,9 +627,6 @@ public class GameLogic : MonoBehaviour {
             currentScore += scoreHitsBird;
 
         desiredNumber = currentScore;
-
-       
-
         // textScore.text = currentScore.ToString() + "/" + scorePerfect.ToString();
 
         if (currentScore >= scoreGoal && (state != GameStates.VICTORY && state != GameStates.VICTORY_ULTIMATE)) {
@@ -650,7 +636,7 @@ public class GameLogic : MonoBehaviour {
 
     }
 
-    public void AddScoreCombo(int scoreCombo)
+    public virtual void AddScoreCombo(int scoreCombo, bool isPlayer1)
     {
 
         textScore.GetComponent<Animator>().SetTrigger("isIncreased");
@@ -687,25 +673,54 @@ public class GameLogic : MonoBehaviour {
     public void AddPenalty(int blockType)
     {
         if (state != GameStates.VICTORY && state != GameStates.VICTORY_ULTIMATE && state != GameStates.LOSE)
-            blockGridLogic.SetMove();
+        {
+            if (blockGridLogic.state != BlockGridLogic.BlockGridLogicStates.STRESS_MODE)
+                blockGridLogic.SetMove();
+        }
 
     }
 
     // BAT SCORE
-    public void batSecretFound(int batScore) {
+    public virtual void batSecretFound(int batScore, bool isPlayer1) {
         // batScore <= 0 --> Secret found!
         // batScore > 0 --> Bonus Score!
         if (batScore <= 0)
         {
             textSecretScore.GetComponent<Animator>().SetTrigger("ShowText");
             // SECRET FOUND
-            imgJewelSecret.enabled = true;
+            if (imgJewelSecret!=null)
+                imgJewelSecret.enabled = true;
         }
         else {
             // ADDITIONAL SCORE
             textSecretScore.GetComponent<Animator>().SetTrigger("ShowText");
-            imgJewelSecret.enabled = true;
-            AddScoreCombo(batScore);
+            if (imgJewelSecret != null)
+                imgJewelSecret.enabled = true;
+
+            AddScoreCombo(batScore, isPlayer1);
+        }
+    }
+
+    public void setChallengeBlock()
+    {
+        // PLAYER FAILS THE CHALLENGE BLOCKS
+        if (!challengeBlocks && state != GameStates.RESULTS)
+        {
+            CoreManager.Audio.Play(CoreManager.Audio.challengeFail, myTransform.position, 2);
+            challengeBlocks = true;
+            if (imgCrossChallenge != null)
+                imgCrossChallenge.enabled = true;
+
+            TextChallengeBlockFail.GetComponent<Animator>().SetTrigger("ShowText");
+        }
+    }
+
+    public void substractBlockRamaining() {
+        blocksRemaining--;
+
+        // IF ALL BLOCKS ARE DIG, ACTIVATE STRESS MODE
+        if (blocksRemaining <= 0) {
+            blockGridLogic.SetStressMode();
         }
     }
 

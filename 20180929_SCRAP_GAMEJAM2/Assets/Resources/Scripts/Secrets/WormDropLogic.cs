@@ -4,7 +4,7 @@ public class WormDropLogic : MonoBehaviour {
 
     public ParticleSystem psDigStones;
     public ParticleSystem psDigStonesGround;
-    public PlayerLogic playerLogic;
+    public GameLogic gameLogic;
 
     private ParticleSystem.MainModule mainPSDigStones;
     private ParticleSystem.MainModule mainPSDigStonesGround;
@@ -12,6 +12,8 @@ public class WormDropLogic : MonoBehaviour {
     private SpriteRenderer spriteDrop;
     private Transform myTransform;
     private Rigidbody rigidDrop;
+    public bool isToxic;
+    public Sprite blockFlesh;
 
 
     // Use this for initialization
@@ -36,6 +38,17 @@ public class WormDropLogic : MonoBehaviour {
         rigidDrop.detectCollisions = true;
         myTransform.position = positionBubble;
         rigidDrop.useGravity = true;
+        if (isToxic)
+        {
+            // green
+            rigidDrop.mass = 1;
+            myTransform.localScale = Vector3.one * 3;
+        }
+        else {
+            // purple (poison)
+            rigidDrop.mass = 3;
+            myTransform.localScale = Vector3.one * 6;
+        }
     }
 
     public void hiddeDrop() {
@@ -53,46 +66,53 @@ public class WormDropLogic : MonoBehaviour {
     void OnTriggerEnter(Collider other)
     {
 
-
+        // IF DROP TOUCHES BLOCK
         if (other.tag == "Block")
         {
-            Debug.Log(other.name);
-            // IF IS NOT A HEAVY ROCK YOU CAN DIG
-            if (other.GetComponent<BlockLogic>().type <= 3)
+            // DROP TOXIC - DEATH (GREEN)
+            if (isToxic)
             {
-                hiddeDrop();
-                mainPSDigStones.startSpeed = 40;
-                psDigStones.Play();
-                mainPSDigStonesGround.startSpeed = 50;
-                psDigStonesGround.Play();
-                /*
-                // psDigStones.transform.position = new Vector3(myTransform.position.x, myTransform.position.y - 1, myTransform.position.z);
-                if (playerLogic.state == PlayerLogic.PlayerStates.DASHDOWN_DIG)
+                // IF IS NOT A HEAVY ROCK YOU CAN DIG
+                if (other.GetComponent<BlockLogic>().type <= 3)
                 {
-
+                    if (other.GetComponent<BlockLogic>().challengeBlock)
+                    {
+                        gameLogic.setChallengeBlock();
+                    }
+                    hiddeDrop();
                     mainPSDigStones.startSpeed = 40;
                     psDigStones.Play();
                     mainPSDigStonesGround.startSpeed = 50;
                     psDigStonesGround.Play();
-                }
-                else
-                {
-                    mainPSDigStones.startSpeed = 20;
-                    psDigStones.Play();
-                    mainPSDigStonesGround.startSpeed = 15;
-                    psDigStonesGround.Play();
-                }*/
+                    CoreManager.Audio.Play(CoreManager.Audio.playerDig, myTransform.position);
+                    other.gameObject.SetActive(false);
+                    gameLogic.substractBlockRamaining();
 
-                CoreManager.Audio.Play(CoreManager.Audio.playerDig, myTransform.position);
-                // Destroy(other.gameObject);
-                other.gameObject.SetActive(false);
-                
+                }
             }
-        } else if (other.tag == "Player" && playerLogic.state != PlayerLogic.PlayerStates.DIE)
+            // DROP POISON (PURPLE)
+            else {
+                    if (other.GetComponent<BlockLogic>().type <= 3)
+                    {
+                        hiddeDrop();
+                        mainPSDigStones.startSpeed = 40;
+                        psDigStones.Play();
+                        mainPSDigStonesGround.startSpeed = 50;
+                        psDigStonesGround.Play();
+                        other.GetComponent<SpriteRenderer>().sprite = blockFlesh;
+                        other.GetComponent<BlockLogic>().type = 0;
+                        CoreManager.Audio.Play(CoreManager.Audio.wormEggExplosion, myTransform.position);
+                    }
+                }
+            // IF DROP TOUCHES PLAYER
+        } else if (other.tag == "Player" && other.GetComponent<PlayerLogic>().state != PlayerLogic.PlayerStates.DIE)
         {
             hiddeDrop();
 
-            playerLogic.setDie(0);
+            if (isToxic)
+                other.GetComponent<PlayerLogic>().setDie(0);
+            else
+                other.GetComponent<PlayerLogic>().playerIsPoison();
             
         }
 

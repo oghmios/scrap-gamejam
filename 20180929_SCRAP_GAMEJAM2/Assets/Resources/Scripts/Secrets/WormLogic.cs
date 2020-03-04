@@ -27,12 +27,12 @@ public class WormLogic : MonoBehaviour {
     public float tempWaitBubble;
     private float tempBubble;
 
-    private float temp, tempColor;
-    private int iColor;
+    private float temp;
     private Transform myTransform;
     private Vector3 positionOrig;
     private bool isFacingOrig;
     public GameLogic gameLogic;
+    public bool isPoison;
     
     // Use this for initialization
     void Start () {
@@ -47,13 +47,28 @@ public class WormLogic : MonoBehaviour {
             spriteWorm.color = Color.green;
         else if (batType == 3)
             spriteWorm.color = Color.yellow;*/
-        spriteWorm.color = new Color(0.2f, 0.8f, 0.2f);
-        wormBubble.GetComponent<SpriteRenderer>().color = spriteWorm.color;
+
+        if (Random.Range(0, 2) == 1)
+            isPoison = true;
+        else
+            isPoison = false;
+
+        if (isPoison)
+        {
+            spriteWorm.color = new Color(0.2f, 0.8f, 0.2f);
+            speed = 1;
+            tempWaitBubble = 10;
+        }
+        else
+        {
+            spriteWorm.color = new Color(0.7f, 0.3f, 0.7f);
+            speed = 2;
+            tempWaitBubble = 5;
+        }
+
+        wormBubble.setTypeWorm(isPoison);
 
         // FOR MULTIPCOLOR batType == 4
-        iColor = 0;
-        tempColor = 0.05f;
-
         myTransform = this.transform;
         positionOrig = myTransform.position;
         isFacingOrig = isFacingRight;
@@ -82,11 +97,40 @@ public class WormLogic : MonoBehaviour {
 
         tempBubble -= Time.deltaTime;
 
-        if (tempBubble < 0 && gameLogic.state != GameLogic.GameStates.RESULTS ) {
-            wormBubble.transform.position = myTransform.position;
-            wormBubble.setIncrease();
-            tempBubble = tempWaitBubble;
+        if (gameLogic is GameLogicCoop)
+        {
+
+            if (tempBubble < 0 && gameLogic.state != GameLogicCoop.GameStates.RESULTS)
+            {
+                wormBubble.setIncrease(myTransform.position);
+                tempBubble = tempWaitBubble;
+            }
+
         }
+        else if (gameLogic is GameLogicPvP)
+        {
+            if (tempBubble < 0 && gameLogic.state != GameLogicPvP.GameStates.RESULTS)
+            {
+                wormBubble.setIncrease(myTransform.position);
+                tempBubble = tempWaitBubble;
+            }
+
+
+        }
+        else if (gameLogic is GameLogic)
+        {
+            if (tempBubble < 0 && gameLogic.state != GameLogic.GameStates.RESULTS)
+            {
+                wormBubble.setIncrease(myTransform.position);
+                tempBubble = tempWaitBubble;
+            }
+
+        }
+        /*
+        if (tempBubble < 0 && gameLogic.state != GameLogic.GameStates.RESULTS ) {
+            wormBubble.setIncrease(myTransform.position);
+            tempBubble = tempWaitBubble;
+        }*/
 
     }
 

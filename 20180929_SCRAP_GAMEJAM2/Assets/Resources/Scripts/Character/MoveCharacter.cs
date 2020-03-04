@@ -151,7 +151,7 @@ public class MoveCharacter : MonoBehaviour {
         }
 
         // PROBAR
-        if (isGround && (hInput.GetButtonDown("Jump"+control) || hInput.GetAxis("Jump" + control) != 0) && !isJump)
+        if (isGround && (hInput.GetButtonDown("Jump"+control) || hInput.GetAxis("Jump"+control) != 0) && !isJump)
         {
             isJump = true;
             animatorCharacter.SetBool("isJump", true);
@@ -160,7 +160,7 @@ public class MoveCharacter : MonoBehaviour {
             rigid.velocity = Vector3.up * jumpSpeed;
         }
 
-        if (isJump && (hInput.GetButton("Jump"+control) || hInput.GetAxis("Jump" + control) != 0))
+        if (isJump && (hInput.GetButton("Jump"+control) || hInput.GetAxis("Jump"+control) != 0))
         {
             if (jumpTimeCounter > 0)
             {
@@ -172,7 +172,7 @@ public class MoveCharacter : MonoBehaviour {
             }
         }
 
-        if (isJump && (hInput.GetButtonUp("Jump"+control) || hInput.GetAxis("Jump" + control) == 0))
+        if (isJump && (hInput.GetButtonUp("Jump"+control) || hInput.GetAxis("Jump"+control) == 0))
         {
             isJump = false;
         }

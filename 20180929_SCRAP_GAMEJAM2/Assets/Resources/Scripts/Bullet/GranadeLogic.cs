@@ -8,6 +8,7 @@ public class GranadeLogic: MonoBehaviour {
 	// public AudioManager audioManger;
     public int typeBullet;
     public bool isTouchedBird = false;
+    public bool IsFromPlayer1 = true;
     // Use this for initialization
     /*
     void Start () {

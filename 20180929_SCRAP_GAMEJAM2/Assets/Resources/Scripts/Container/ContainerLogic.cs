@@ -24,7 +24,7 @@ public class ContainerLogic : MonoBehaviour
     public float timeOpened;
     private float timeSleepDecay;
     private float timeOpenedDecay;
-    private Transform myTransform;
+    protected Transform myTransform;
     public bool bulletHitsBird = false;
     public ComboSystemLogic comboSystemLogic;
     public ParticleSystem psContainerFumes, psContainerStones;
@@ -33,8 +33,6 @@ public class ContainerLogic : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        // CoreManager.Audio = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
-        // gameLogic = GameObject.FindGameObjectWithTag("GameLogic").GetComponent<GameLogic>();
         myTransform = this.transform;
         timeSleepDecay = timeSleep;
         timeOpenedDecay = timeOpened;
@@ -144,7 +142,7 @@ public class ContainerLogic : MonoBehaviour
 
     }
 
-    void OnTriggerEnter(Collider other)
+    public virtual void OnTriggerEnter(Collider other)
     {
        
         if (other.tag == "Bullet")
@@ -246,7 +244,7 @@ public class ContainerLogic : MonoBehaviour
                 else if (comboSystemLogic.IsComboStart() || comboSystemLogic.IsComboContinue())
                     comboSystemLogic.setComboContinue(this, typeOfBlock);
 
-                gameLogic.AddScore(typeOfBlock, bulletHitsBird);
+                gameLogic.AddScore(true, typeOfBlock, bulletHitsBird);
 
                 
             }
@@ -309,13 +307,13 @@ public class ContainerLogic : MonoBehaviour
         }
     }
 
-    public void PlayCombo(int comboN) {
+    public virtual void PlayCombo(int comboN, bool isPlayer1) {
         textContainerCombo.text = "Combo X"+comboN;
         textContainerCombo.GetComponent<Animator>().SetTrigger("AddCombo");
         textContainerComboFinish.text = "";
     }
 
-    public void PlayComboFinish(int comboN, int comboScore, bool isComboVariety)
+    public virtual void PlayComboFinish(int comboN, int comboScore, bool isComboVariety, bool isPlayer1)
     {
         textContainerComboFinish.text = "";
         if (comboN == 2)
@@ -394,26 +392,26 @@ public class ContainerLogic : MonoBehaviour
         textContainerComboFinish.GetComponent<Animator>().SetTrigger("AddComboFinish");
     }
 
-    public void ResetContainer()
+    public virtual void ResetContainer(bool isPlayer1)
     {       
            textContainerCombo.text = "";
            textContainerComboFinish.text = "";
     }
 
-    IEnumerator WaitAddScoreAnimation() {
+    protected IEnumerator WaitAddScoreAnimation() {
         
         
         yield return new WaitForSeconds(0.5f);
     }
 
-    IEnumerator WaitFailScoreAnimation()
+    protected IEnumerator WaitFailScoreAnimation()
     {
         
         
         yield return new WaitForSeconds(0.5f);
     }
 
-    IEnumerator ColorBadContainer()
+    protected IEnumerator ColorBadContainer()
     {
         spriteContainer.GetComponent<Animator>().SetTrigger("ContainerFail");
         spriteContainer.color = Color.red;
@@ -423,7 +421,7 @@ public class ContainerLogic : MonoBehaviour
         spriteContainer.color = spriteContainerColor;
     }
 
-    IEnumerator ColorGoodContainer()
+    protected IEnumerator ColorGoodContainer()
     {
         spriteContainer.GetComponent<Animator>().SetTrigger("ContainerSuccess");
         spriteContainer.color = Color.white;

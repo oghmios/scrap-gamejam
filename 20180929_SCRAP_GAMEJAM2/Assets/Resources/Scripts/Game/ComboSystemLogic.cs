@@ -18,6 +18,7 @@ public class ComboSystemLogic : MonoBehaviour {
     public List<int> listCombo;
     private bool isComboVariety = false;
     private Transform myTransform;
+    public bool isPlayer1 = true;
 
     // Use this for initialization
     void Start () {
@@ -82,7 +83,7 @@ public class ComboSystemLogic : MonoBehaviour {
         lastContainerLogic = containerLogicAux;
         if (comboCount >= 2)
         {
-            lastContainerLogic.PlayCombo(comboCount);
+            lastContainerLogic.PlayCombo(comboCount, isPlayer1);
         }
 
         if (comboCount == 2)
@@ -151,13 +152,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore2 * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore2 * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore2 * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore2 * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScore2, isComboVariety);
-                gameLogic.AddScoreCombo(comboScore2);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScore2, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScore2, isPlayer1);
             }
         }
         else if (comboCountAux == 3)
@@ -165,13 +166,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore3 * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore3 * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore3 * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore3 * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScore3, isComboVariety);
-                gameLogic.AddScoreCombo(comboScore3);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScore3, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScore3, isPlayer1);
             }
         }
         else if (comboCountAux == 4)
@@ -179,13 +180,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore4 * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore4 * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore4 * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore4 * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScore4, isComboVariety);
-                gameLogic.AddScoreCombo(comboScore4);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScore4, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScore4, isPlayer1);
             }
         }
         else if (comboCountAux == 5)
@@ -193,13 +194,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore5 * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore5 * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore5 * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore5 * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScore5, isComboVariety);
-                gameLogic.AddScoreCombo(comboScore5);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScore5, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScore5, isPlayer1);
             }
         }
         else if (comboCountAux == 6)
@@ -207,13 +208,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore6 * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore6 * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore6 * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore6 * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScore6, isComboVariety);
-                gameLogic.AddScoreCombo(comboScore6);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScore6, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScore6, isPlayer1);
             }
         }
         else if (comboCountAux == 7)
@@ -221,13 +222,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore7 * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore7 * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore7 * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore7 * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScore7, isComboVariety);
-                gameLogic.AddScoreCombo(comboScore7);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScore7, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScore7, isPlayer1);
             }
         }
         else if (comboCountAux == 8)
@@ -235,13 +236,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore8 * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore8 * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScore8 * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScore8 * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScore8, isComboVariety);
-                gameLogic.AddScoreCombo(comboScore8);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScore8, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScore8, isPlayer1);
             }
         }
         else if (comboCountAux > 8)
@@ -249,13 +250,13 @@ public class ComboSystemLogic : MonoBehaviour {
             // GAME LOGIC CALL
             if (isComboVariety)
             {
-                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScoreMax * 1.25f), isComboVariety);
-                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScoreMax * 1.25f));
+                lastContainerLogic.PlayComboFinish(comboCount, Mathf.RoundToInt(comboScoreMax * 1.25f), isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(Mathf.RoundToInt(comboScoreMax * 1.25f), isPlayer1);
             }
             else
             {
-                lastContainerLogic.PlayComboFinish(comboCount, comboScoreMax, isComboVariety);
-                gameLogic.AddScoreCombo(comboScoreMax);
+                lastContainerLogic.PlayComboFinish(comboCount, comboScoreMax, isComboVariety, isPlayer1);
+                gameLogic.AddScoreCombo(comboScoreMax, isPlayer1);
             }
         }
 

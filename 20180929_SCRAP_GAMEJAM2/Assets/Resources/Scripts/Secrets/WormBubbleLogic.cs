@@ -40,6 +40,25 @@ public class WormBubbleLogic : MonoBehaviour {
         }
     }
     // SETS
+    public void setTypeWorm(bool isToxicAux) {
+
+        // DROP TOXIC - DEATH (GREEN) 
+        if (isToxicAux)
+        {
+            spriteBubble.color = new Color(0.2f, 0.8f, 0.2f);
+            tempIncrease = 5;
+        }
+        // DROP POISON (PURPLE)
+        else
+        {
+            spriteBubble.color = new Color(0.7f, 0.3f, 0.7f);
+            tempIncrease = 2;
+        }
+
+        wormDrop.isToxic = isToxicAux;
+    }
+
+
     public void setSleep()
     {
         myTransform.localScale = scaleOrig;
@@ -47,8 +66,9 @@ public class WormBubbleLogic : MonoBehaviour {
         state = WormBubbleStates.SLEEP;
     }
 
-    public void setIncrease() {
+    public void setIncrease(Vector3 positionParent) {
         temp = tempIncrease;
+        myTransform.position = positionParent;
         myTransform.localScale = scaleOrig;
         CoreManager.Audio.Play(CoreManager.Audio.wormPutEgg, myTransform.position);
         wormDrop.hiddeDrop();

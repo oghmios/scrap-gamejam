@@ -19,17 +19,20 @@ public class SourceMovement : MonoBehaviour {
     public float minLimitImpulse, maxLimitImpulse; 
     public float yForce = 5f;
     public float oneShotImpulse;
+    private Transform myTransform;
+    public bool IsPlayer1 = true;
 
     void Start(){
+        myTransform = this.transform;
 
-        if (PlayerPrefs.GetFloat("ThrowSensitivity") == 0)
+        if (PlayerPrefs.GetFloat("ThrowSensitivity"+playerLogic.control) == 0)
         {
-            PlayerPrefs.SetFloat("ThrowSensitivity", 1f);
+            PlayerPrefs.SetFloat("ThrowSensitivity"+playerLogic.control, 1f);
             maxLimitImpulse = 1;
         }
         else
         {
-            maxLimitImpulse = PlayerPrefs.GetFloat("ThrowSensitivity");
+            maxLimitImpulse = PlayerPrefs.GetFloat("ThrowSensitivity"+playerLogic.control);
         }
 
         forceExpulsionAux = 0;
@@ -62,7 +65,7 @@ public class SourceMovement : MonoBehaviour {
          StartCoroutine("ThrowGarbage", modeBullet);
         // bulletAux.GetComponent<Rigidbody>().velocity = bulletAux.transform.right * 15f;
 
-        CoreManager.Audio.Play(CoreManager.Audio.playerDigImpossible, transform.position);
+        CoreManager.Audio.Play(CoreManager.Audio.playerDigImpossible, myTransform.position);
 
         state = PlayerAttackStates.RANGE;
 		
@@ -126,20 +129,22 @@ public class SourceMovement : MonoBehaviour {
         // RESET THE RIGIDBODY PROPERTIES
         bulletAux.GetComponent<Rigidbody>().velocity = Vector3.zero;
         bulletAux.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-        bulletAux.transform.rotation = Quaternion.Euler(Vector3.zero);
 
-        bulletAux.transform.position = transform.position; // new Vector3(transform.position.x, transform.position.y, transform.position.z);
+        if (IsPlayer1)
+            bulletAux.GetComponent<GranadeLogic>().IsFromPlayer1 = true;
+        else
+            bulletAux.GetComponent<GranadeLogic>().IsFromPlayer1 = false;
+        // bulletAux.transform.rotation = Quaternion.Euler(Vector3.zero);
+
+        bulletAux.transform.position = myTransform.position;
         bulletAux.transform.rotation = Quaternion.identity;
 
         bulletAux.SetActive(true);
 
-        if (PlayerPrefs.GetInt("OneShot") == 1)
-            bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x * 1.25f, yForce, 0) * oneShotImpulse); // *1000);
+        if (PlayerPrefs.GetInt("OneShot"+playerLogic.control) == 1)
+            bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(myTransform.localPosition.x * 1.25f, yForce, 0) * oneShotImpulse); // *1000);
         else
-            bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(transform.localPosition.x * 1.25f, yForce, 0) * multiplyImpulse); // *1000);
-
-        // Debug.Log("MULTIPLIER: " + multiplyImpulse + " X:" + transform.localPosition.x * 1.25f + " Y:" + yForce+" LAUNCHE VECTOR: " +(new Vector3(transform.localPosition.x*1.25f, yForce, 0) * multiplyImpulse).ToString());
-
+            bulletAux.GetComponent<Rigidbody>().AddForce(new Vector3(myTransform.localPosition.x * 1.25f, yForce, 0) * multiplyImpulse); // *1000);
 
     }
 

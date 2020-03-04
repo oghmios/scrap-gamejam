@@ -30,14 +30,23 @@ public class MainMenuLogic : MonoBehaviour {
         if (!PlayerPrefs.HasKey("Sound"))
             PlayerPrefs.SetInt("Sound", 1);
 
-        if (!PlayerPrefs.HasKey("GuideThrow"))
-            PlayerPrefs.SetInt("GuideThrow", 1);
+        if (!PlayerPrefs.HasKey("GuideThrow_J1"))
+            PlayerPrefs.SetInt("GuideThrow_J1", 1);
 
-        if (!PlayerPrefs.HasKey("ThrowSensitivity"))
-            PlayerPrefs.SetFloat("ThrowSensitivity", 0.8f);
+        if (!PlayerPrefs.HasKey("GuideThrow_J2"))
+            PlayerPrefs.SetInt("GuideThrow_J2", 1);
 
-        if (!PlayerPrefs.HasKey("OneShot"))
-            PlayerPrefs.SetInt("OneShot", 0);
+        if (!PlayerPrefs.HasKey("ThrowSensitivity_J1"))
+            PlayerPrefs.SetFloat("ThrowSensitivity_J1", 0.8f);
+
+        if (!PlayerPrefs.HasKey("ThrowSensitivity_J2"))
+            PlayerPrefs.SetFloat("ThrowSensitivity_J2", 0.8f);
+
+        if (!PlayerPrefs.HasKey("OneShot_J1"))
+            PlayerPrefs.SetInt("OneShot_J1", 0);
+
+        if (!PlayerPrefs.HasKey("OneShot_J2"))
+            PlayerPrefs.SetInt("OneShot_J2", 0);
 
         if (PlayerPrefs.GetInt("Sound") == 1)
         {
@@ -49,6 +58,17 @@ public class MainMenuLogic : MonoBehaviour {
             audioMusic.Stop();
             textAudio.text = "AUDIO OFF";
         }
+
+        // PvP Mode
+        if (!PlayerPrefs.HasKey("P1TotalWins"))
+            PlayerPrefs.SetInt("P1TotalWins", 0);
+        else
+            PlayerPrefs.SetInt("P1TotalWins", 0);
+
+        if (!PlayerPrefs.HasKey("P2TotalWins"))
+            PlayerPrefs.SetInt("P2TotalWins", 0);
+        else
+            PlayerPrefs.SetInt("P2TotalWins", 0);
 
         if (panelTutorial!=null)
 		panelTutorial.gameObject.SetActive(false);

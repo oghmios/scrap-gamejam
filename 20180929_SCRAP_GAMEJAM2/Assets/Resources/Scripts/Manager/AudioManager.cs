@@ -18,6 +18,7 @@ public class AudioManager : MonoBehaviour
 
     [Header("GAME EFFECTS")]
     public AudioClip buzzerScore;
+    public AudioClip challengeFail;
     public AudioClip blocksMoving01;
     public AudioClip blocksMoving02;
     public AudioClip blocksMoving03;

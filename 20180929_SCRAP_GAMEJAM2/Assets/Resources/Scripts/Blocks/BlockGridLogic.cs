@@ -5,22 +5,27 @@ using UnityEngine;
 
 public class BlockGridLogic : MonoBehaviour {
 
-    public enum BlockGridLogicStates { NONE, SLEEP, PREPARE, MOVE }
+    public enum BlockGridLogicStates { NONE, SLEEP, PREPARE, MOVE, STRESS_MODE }
     public BlockGridLogicStates state;
     public GameObject[] blockTypes;
     public GameObject blockHeavy;
     public GameObject[][] lineOfBlocks; // = new GameObject[10][];
     public ParticleSystem earthQuake;
-    private Quaternion rotation;
+    public GameLogic gameLogic;
+    // private Quaternion rotation;
     private System.Random randomBlockNumber;
     private Vector3 position2Move;
     private float timeDecay, time2Move;
     private Transform myTransform;
+    private Color colorChallenge = new Color(1, 0.7f, 0.7f);
+    private int blocksRemaining;
+    private ParticleSystem.MainModule earthQuakeMain;
 
     // Use this for initialization
     void Start () {
         myTransform = transform;
         position2Move = myTransform.position;
+        earthQuakeMain = earthQuake.main;
 
     }
     void Update()
@@ -40,24 +45,27 @@ public class BlockGridLogic : MonoBehaviour {
             case BlockGridLogicStates.MOVE:
                 MoveBehaviour();
                 break;
-          
+            case BlockGridLogicStates.STRESS_MODE:
+                StressModeBehaviour();
+                break;
+
         }
         
     }
     // SETS
 
-    public void setCreateBlocks(int numRows, int numColumns, int numHeavyRows, float time2MoveAux) {
+    public void setCreateBlocks(int numRows, int numColumns, int numChallengeRows, int numHeavyRows, float time2MoveAux) {
         randomBlockNumber = new System.Random();
-
+        blocksRemaining = 0;
         int randomMax = blockTypes.Length;
         time2Move = time2MoveAux;
         timeDecay = time2Move;
 
-        lineOfBlocks = new GameObject[numRows+ numHeavyRows][];
+        lineOfBlocks = new GameObject[numRows+ numChallengeRows+ numHeavyRows][];
 
         for (int j = 0; j < numRows; j++)
         {
-            lineOfBlocks[j] = new GameObject[numRows+ numHeavyRows];
+            lineOfBlocks[j] = new GameObject[numRows+ numChallengeRows + numHeavyRows];
             int maxOfCoin = 0;
             for (int i = 0; i < numColumns; i++)
             {
@@ -72,7 +80,8 @@ public class BlockGridLogic : MonoBehaviour {
                     randomMax = 3;
                 }
                 //lineOfBlocks[j][i] = new GameObject();
-                lineOfBlocks[j][i] = (GameObject)Instantiate(blockTypes[randomType], position2Move, rotation);
+                lineOfBlocks[j][i] = (GameObject)Instantiate(blockTypes[randomType], position2Move, Quaternion.identity); // rotation);
+                blocksRemaining++;
                 lineOfBlocks[j][i].transform.parent = myTransform;
                 position2Move.x += 4.5f;
                 //transform.position.Set(position2Move.x, position2Move.y, position2Move.z);
@@ -86,13 +95,41 @@ public class BlockGridLogic : MonoBehaviour {
             
         }
 
-        // CREATION OF HEAVY BLOCKS (CAN'T DIG)
-        for (int j = numRows; j < numRows+ numHeavyRows; j++)
+        // CREATION OF  CHALLENGE BLOCKS
+        for (int j = numRows; j < numRows + numChallengeRows; j++)
         {
-            lineOfBlocks[j] = new GameObject[numRows + numHeavyRows];
+            lineOfBlocks[j] = new GameObject[numRows + numChallengeRows + numHeavyRows];
+            int maxOfCoin = 0;
+            for (int i = 0; i < numColumns; i++)
+            {
+                int randomType = randomBlockNumber.Next(0, randomMax);
+                if (randomType == 3)
+                {
+                    maxOfCoin++;
+                }
+                if (maxOfCoin == 2)
+                {
+                    randomMax = 3;
+                }
+                lineOfBlocks[j][i] = (GameObject)Instantiate(blockTypes[randomType], position2Move, Quaternion.identity); // rotation);
+                blocksRemaining++;
+                lineOfBlocks[j][i].transform.parent = myTransform;
+                lineOfBlocks[j][i].GetComponent<BlockLogic>().challengeBlock = true;
+                lineOfBlocks[j][i].GetComponent<SpriteRenderer>().color = colorChallenge;
+                position2Move.x += 4.5f;
+
+            }
+            position2Move.x = myTransform.position.x;
+            position2Move.y -= 4.5f;
+        }
+
+        // CREATION OF HEAVY BLOCKS (CAN'T DIG)
+        for (int j = numRows + numChallengeRows; j < numRows + numChallengeRows + numHeavyRows; j++)
+        {
+            lineOfBlocks[j] = new GameObject[numRows + numChallengeRows + numHeavyRows];
             for (int i = 0; i < numColumns ; i++)
             {
-                lineOfBlocks[j][i] = (GameObject)Instantiate(blockHeavy, position2Move, rotation);
+                lineOfBlocks[j][i] = (GameObject)Instantiate(blockHeavy, position2Move, Quaternion.identity); // rotation);
                 lineOfBlocks[j][i].transform.parent = myTransform;
                 position2Move.x += 4.5f;
 
@@ -100,12 +137,16 @@ public class BlockGridLogic : MonoBehaviour {
             position2Move.x = myTransform.position.x;
             position2Move.y -= 4.5f;
         }
-        
+
+        gameLogic.blocksRemaining = blocksRemaining;
+
+
     }
 
 
     public void SetNone()
     {
+        earthQuakeMain.loop = false;
         state = BlockGridLogicStates.NONE;
     }
 
@@ -146,6 +187,17 @@ public class BlockGridLogic : MonoBehaviour {
         state = BlockGridLogicStates.MOVE;
     }
 
+    public void SetStressMode() {
+        timeDecay = 30f;
+        time2Move = 0.0025f;
+
+
+        earthQuakeMain.loop = true;
+        earthQuake.Play();
+        CameraShake.Shake(Vector3.one*0.5f, 30f);
+        state = BlockGridLogicStates.STRESS_MODE;
+    }
+
 
     // BEHAVIOURS
 
@@ -175,6 +227,20 @@ public class BlockGridLogic : MonoBehaviour {
     {
 
         myTransform.Translate(Vector3.up * Time.deltaTime);
+        timeDecay -= Time.deltaTime;
+
+        if (timeDecay < 0)
+        {
+            SetSleep();
+
+        }
+
+    }
+
+    void StressModeBehaviour()
+    {
+
+        myTransform.Translate(Vector3.up * Time.deltaTime * 2);
         timeDecay -= Time.deltaTime;
 
         if (timeDecay < 0)

@@ -186,7 +186,7 @@ public class BatSecret : MonoBehaviour {
         state = BatSecretStates.DISSAPEAR;
     }
 
-    public void setExplode()
+    public void setExplode(bool isFromPlayer1)
     {
         CoreManager.Audio.Play(CoreManager.Audio.batCrow, myTransform.position);
         CoreManager.Audio.Play(CoreManager.Audio.batExplosion, myTransform.position);
@@ -195,7 +195,7 @@ public class BatSecret : MonoBehaviour {
         GetComponent<Rigidbody>().detectCollisions = false;
         spriteBat.enabled = false;
 
-        gameLogic.batSecretFound(batScore);
+        gameLogic.batSecretFound(batScore, isFromPlayer1);
 
         state = BatSecretStates.EXPLODE;
     }
@@ -323,7 +323,7 @@ public class BatSecret : MonoBehaviour {
                 other.GetComponent<GranadeLogic>().isTouchedBird = true;
 
                 if (batTypeIndex <= 0)
-                    setExplode();
+                    setExplode(other.GetComponent<GranadeLogic>().IsFromPlayer1);
                 else
                 {
                     psLayerFlesh.Play(); 
@@ -341,7 +341,7 @@ public class BatSecret : MonoBehaviour {
                 other.GetComponent<GranadeLogic>().isTouchedBird = true;
 
                 if (batTypeIndex <= 0)
-                    setExplode();
+                    setExplode(other.GetComponent<GranadeLogic>().IsFromPlayer1);
                 else
                 {
                     if (batType[batTypeIndex] == 0)
